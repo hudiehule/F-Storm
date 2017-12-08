@@ -49,7 +49,7 @@ struct GlobalStreamId {
   #Going to need to add an enum for the stream type (NORMAL or FAILURE)
 }
 
-union Grouping {
+union Grouping {   //消息的分组方式
   1: list<string> fields; //empty list means global grouping
   2: NullStruct shuffle; // tuple is sent to random task
   3: NullStruct all; // tuple is sent to every task
@@ -71,15 +71,16 @@ struct ShellComponent {
   2: string script;
 }
 
+//描述组件具体逻辑的数据结构
 union ComponentObject {
   1: binary serialized_java;
   2: ShellComponent shell;
   3: JavaObject java_object;
 }
-
+//描述组件的输入输出的common对象
 struct ComponentCommon {
-  1: required map<GlobalStreamId, Grouping> inputs;
-  2: required map<string, StreamInfo> streams; //key is stream id
+  1: required map<GlobalStreamId, Grouping> inputs; // all streams that this component receives
+  2: required map<string, StreamInfo> streams; //all streams that this component ouputs ,key is stream id
   3: optional i32 parallelism_hint; //how many threads across the cluster should be dedicated to this component
 
   // component specific configuration respects:
@@ -93,17 +94,29 @@ struct ComponentCommon {
 }
 
 struct SpoutSpec {
-  1: required ComponentObject spout_object;
-  2: required ComponentCommon common;
+  1: required ComponentObject spout_object; //实现具体Spout逻辑的对象
+  2: required ComponentCommon common; //描述其输入输出的common对象
   // can force a spout to be non-distributed by overriding the component configuration
   // and setting TOPOLOGY_MAX_TASK_PARALLELISM to 1
 }
 
 struct Bolt {
-  1: required ComponentObject bolt_object;
-  2: required ComponentCommon common;
+  1: required ComponentObject bolt_object; //实现具体bolt逻辑的对象
+  2: required ComponentCommon common; //描述其输入输出的common对象
 }
 
+// Add by Die_Hu
+enum AccType {
+   GPU = 1;
+   FPGA = 2;
+   None = 3
+}
+// Add by Die_Hu
+struct AccBolt {
+  1: required ComponentObject acc_bolt_object; //实现具体accBolt逻辑的对象
+  2: required ComponentCommon comman; //描述其输入输出的common对象
+  3: required AccType accDeviceType; //描述加速bolt使用的加速设备类型
+}
 // not implemented yet
 // this will eventually be the basis for subscription implementation in storm
 struct StateSpoutSpec {
@@ -111,13 +124,15 @@ struct StateSpoutSpec {
   2: required ComponentCommon common;
 }
 
+//Modified by Die Hu
 struct StormTopology {
   //ids must be unique across maps
   // #workers to use is in conf
   1: required map<string, SpoutSpec> spouts;
   2: required map<string, Bolt> bolts;
-  3: required map<string, StateSpoutSpec> state_spouts;
-  4: optional list<binary> worker_hooks;
+  3: required map<string, AccBolt> accBolts; // AddED by Die Hu
+  4: required map<string, StateSpoutSpec> state_spouts;
+  5: optional list<binary> worker_hooks;
 }
 
 exception AlreadyAliveException {
@@ -144,6 +159,7 @@ exception KeyAlreadyExistsException {
   1: required string msg;
 }
 
+// Modifed by Die Hu
 struct TopologySummary {
   1: required string id;
   2: required string name;
@@ -158,21 +174,30 @@ struct TopologySummary {
 521: optional double requested_memonheap;
 522: optional double requested_memoffheap;
 523: optional double requested_cpu;
-524: optional double assigned_memonheap;
-525: optional double assigned_memoffheap;
-526: optional double assigned_cpu;
+524: optional i32 requested_fpga_device; // Added by Die Hu
+525: optional i32 requested_gpu_device;  // Added by Die Hu
+526: optional double assigned_memonheap;
+527: optional double assigned_memoffheap;
+528: optional double assigned_cpu;
+529: optional i32 assigned_fpga_device; // Added by Die Hu
+530: optional i32 assigned_gpu_device;  // Added by Die Hu
 }
 
+//Modified by Die Hu, add opencl devices info
 struct SupervisorSummary {
   1: required string host;
   2: required i32 uptime_secs;
   3: required i32 num_workers;
   4: required i32 num_used_workers;
-  5: required string supervisor_id;
-  6: optional string version = "VERSION_NOT_PROVIDED";
-  7: optional map<string, double> total_resources;
-  8: optional double used_mem;
-  9: optional double used_cpu;
+  5: required i32 num_ocl_fpga_devices;  // add
+  6: required i32 num_used_ocl_fpga_devices; // add
+  7: required i32 num_ocl_gpu_devices;  // add
+  8: required i32 num_used_ocl_gpu_devices; // add
+  9: required string supervisor_id;
+ 10: optional string version = "VERSION_NOT_PROVIDED";
+ 11: optional map<string, double> total_resources;
+ 12: optional double used_mem;
+ 13: optional double used_cpu;
 }
 
 struct NimbusSummary {
@@ -212,9 +237,21 @@ struct SpoutStats {
   3: required map<string, map<string, double>> complete_ms_avg;
 }
 
+// Add by Die_Hu
+struct AccBoltStats {
+  1: required map<string, map<GlobalStreamId, i64>> acked;
+  2: required map<string, map<GlobalStreamId, i64>> failed;
+  3: required map<string, map<GlobalStreamId, double>> batch_process_ms_avg;
+  4: required map<string, map<GlobalStreamId, i64>> executed;
+  5: required map<string, map<GlobalStreamId, double>> batch_execute_ms_avg;
+}
+
+// 下面的数据结构一直到TopologyInfo包含了在Storm UI上显示的数据
+// Modified by Die Hu
 union ExecutorSpecificStats {
   1: BoltStats bolt;
   2: SpoutStats spout;
+  3: AccBolt accBolt;  //Add by Die Hu
 }
 
 // Stats are a map from the time window (all time or a number indicating number of seconds in the window)
@@ -259,9 +296,13 @@ struct TopologyInfo {
 521: optional double requested_memonheap;
 522: optional double requested_memoffheap;
 523: optional double requested_cpu;
-524: optional double assigned_memonheap;
-525: optional double assigned_memoffheap;
-526: optional double assigned_cpu;
+524: optional double requested_fpga_device; //Add by Die_Hu
+525: optional double requested_gpu_device; //Add by Die_Hu
+526: optional double assigned_memonheap;
+527: optional double assigned_memoffheap;
+528: optional double assigned_cpu;
+529: optional double assigned_fpga_device; //Add by Die_Hu
+530: optional double assigned_gpu_device; //Add by Die_Hu
 }
 
 struct CommonAggregateStats {
@@ -284,14 +325,24 @@ struct BoltAggregateStats {
 4: optional double capacity;
 }
 
+// Add by Die_Hu
+struct AccBoltAggregateStats {
+1: optional double batch_execute_latency_ms;
+2: optional i64    executed;
+3: optional double capacity;
+}
+
 union SpecificAggregateStats {
 1: BoltAggregateStats  bolt;
 2: SpoutAggregateStats spout;
+3: AccBoltAggregateStats accBolt; // Modified by Die_Hu
 }
 
+// Modified by Die Hu
 enum ComponentType {
   BOLT = 1,
-  SPOUT = 2
+  SPOUT = 2,
+  ACCBOLT = 3 // Added by Die Hu
 }
 
 struct ComponentAggregateStats {
@@ -317,20 +368,27 @@ struct TopologyPageInfo {
  5: optional i32 num_tasks;
  6: optional i32 num_workers;
  7: optional i32 num_executors;
- 8: optional string topology_conf;
- 9: optional map<string,ComponentAggregateStats> id_to_spout_agg_stats;
-10: optional map<string,ComponentAggregateStats> id_to_bolt_agg_stats;
-11: optional string sched_status;
-12: optional TopologyStats topology_stats;
-13: optional string owner;
-14: optional DebugOptions debug_options;
-15: optional i32 replication_count;
+ 8: optional i32 num_fpga_devices; // Add by Die Hu
+ 9: optional i32 num_gpu_devices; // Add by Die Hu
+ 10: optional string topology_conf;
+11: optional map<string,ComponentAggregateStats> id_to_spout_agg_stats;
+12: optional map<string,ComponentAggregateStats> id_to_bolt_agg_stats;
+13: optional map<string,ComponentAggregateStats> id_to_accBolt_agg_stats; // Add by Die Hu
+14: optional string sched_status;
+15: optional TopologyStats topology_stats;
+16: optional string owner;
+17: optional DebugOptions debug_options;
+18: optional i32 replication_count;
 521: optional double requested_memonheap;
 522: optional double requested_memoffheap;
 523: optional double requested_cpu;
-524: optional double assigned_memonheap;
-525: optional double assigned_memoffheap;
-526: optional double assigned_cpu;
+524: optional double requested_fpga_device; // Add by Die Hu
+525: optional double requested_gpu_device; // Add by Die Hu
+526: optional double assigned_memonheap;
+527: optional double assigned_memoffheap;
+528: optional double assigned_cpu;
+529: optional double assigned_fpga_device; // Add by Die Hu
+530: optional double assigned_gpu_device; // Add by Die Hu
 }
 
 struct ExecutorAggregateStats {
@@ -338,28 +396,31 @@ struct ExecutorAggregateStats {
 2: optional ComponentAggregateStats stats;
 }
 
+// Modified by Die Hu
 struct ComponentPageInfo {
  1: required string component_id;
  2: required ComponentType component_type;
- 3: optional string topology_id;
- 4: optional string topology_name;
- 5: optional i32 num_executors;
- 6: optional i32 num_tasks;
- 7: optional map<string,ComponentAggregateStats> window_to_stats;
- 8: optional map<GlobalStreamId,ComponentAggregateStats> gsid_to_input_stats;
- 9: optional map<string,ComponentAggregateStats> sid_to_output_stats;
-10: optional list<ExecutorAggregateStats> exec_stats;
-11: optional list<ErrorInfo> errors;
-12: optional string eventlog_host;
-13: optional i32 eventlog_port;
-14: optional DebugOptions debug_options;
-15: optional string topology_status;
+ 3: optional AccType acc_type;
+ 4: optional string topology_id;
+ 5: optional string topology_name;
+ 6: optional i32 num_executors;
+ 7: optional i32 num_tasks;
+ 8: optional map<string,ComponentAggregateStats> window_to_stats;
+ 9: optional map<GlobalStreamId,ComponentAggregateStats> gsid_to_input_stats;
+10: optional map<string,ComponentAggregateStats> sid_to_output_stats;
+11: optional list<ExecutorAggregateStats> exec_stats;
+12: optional list<ErrorInfo> errors;
+13: optional string eventlog_host;
+14: optional i32 eventlog_port;
+15: optional DebugOptions debug_options;
+16: optional string topology_status;
 }
 
 struct KillOptions {
   1: optional i32 wait_secs;
 }
 
+// need change
 struct RebalanceOptions {
   1: optional i32 wait_secs;
   2: optional i32 num_workers;
@@ -415,6 +476,7 @@ struct BeginDownloadResult {
   3: optional i64 data_size;
 }
 
+// Modified by Die Hu
 struct SupervisorInfo {
     1: required i64 time_secs;
     2: required string hostname;
@@ -425,6 +487,8 @@ struct SupervisorInfo {
     7: optional i64 uptime_secs;
     8: optional string version;
     9: optional map<string, double> resources_map;
+   10: optional i32 ocl_fpga_device_num; // add
+   11: optional i32 ocl_gpu_device_num;  // add
 }
 
 struct NodeInfo {
@@ -432,11 +496,14 @@ struct NodeInfo {
     2: required set<i64> port;
 }
 
+
 struct WorkerResources {
     1: optional double mem_on_heap;
     2: optional double mem_off_heap;
     3: optional double cpu;
 }
+
+
 struct Assignment {
     1: required string master_code_dir;
     2: optional map<string, string> node_host = {};
@@ -457,16 +524,19 @@ union TopologyActionOptions {
     2: optional RebalanceOptions rebalance_options;
 }
 
+// Modified by Die Hu
 struct StormBase {
     1: required string name;
     2: required TopologyStatus status;
     3: required i32 num_workers;
-    4: optional map<string, i32> component_executors;
-    5: optional i32 launch_time_secs;
-    6: optional string owner;
-    7: optional TopologyActionOptions topology_action_options;
-    8: optional TopologyStatus prev_status;//currently only used during rebalance action.
-    9: optional map<string, DebugOptions> component_debug; // topology/component level debug option.
+    4: optional i32 num_fpga_devices; // add
+    5: optional i32 num_gpu_device;  // add
+    6: optional map<string, i32> component_executors;
+    7: optional i32 launch_time_secs;
+    8: optional string owner;
+    9: optional TopologyActionOptions topology_action_options;
+   10: optional TopologyStatus prev_status;//currently only used during rebalance action.
+   11: optional map<string, DebugOptions> component_debug; // topology/component level debug option.
 }
 
 struct ClusterWorkerHeartbeat {
