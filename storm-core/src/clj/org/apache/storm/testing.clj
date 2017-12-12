@@ -394,7 +394,7 @@
     cluster-map
     storm-name
     :emitted
-    :component-ids (keys (.get_spouts topology))))
+    :component-ids (keys (.getSpouts topology))))
 
 (defn transferred-tuples
   [cluster-map storm-name]
@@ -460,21 +460,21 @@
 (defn spout-objects [spec-map]
   (for [[_ spout-spec] spec-map]
     (-> spout-spec
-        .get_spout_object
+        .getSpout_object
         deserialized-component-object)))
 
 (defn capture-topology
   [topology]
   (let [topology (.deepCopy topology)
-        spouts (.get_spouts topology)
-        bolts (.get_bolts topology)
+        spouts (.getSpouts topology)
+        bolts (.getBolts topology)
         all-streams (apply concat
                            (for [[id spec] (merge (clojurify-structure spouts)
                                                   (clojurify-structure bolts))]
-                             (for [[stream info] (.. spec get_common get_streams)]
-                               [(GlobalStreamId. id stream) (.is_direct info)])))
+                             (for [[stream info] (.. spec getCommon getStreams)]
+                               [(GlobalStreamId. id stream) (.isDirect info)])))
         capturer (TupleCaptureBolt.)]
-    (.set_bolts topology
+    (.setBolts topology
                 (assoc (clojurify-structure bolts)
                   (uuid)
                   (Bolt.
@@ -501,7 +501,7 @@
   (let [{topology :topology capturer :capturer} (capture-topology topology)
         storm-name (or topology-name (str "topologytest-" (uuid)))
         state (:storm-cluster-state cluster-map)
-        spouts (.get_spouts topology)
+        spouts (.getSpouts topology)
         replacements (map-val (fn [v]
                                 (FixedTupleSpout.
                                   (for [tup v]
@@ -511,7 +511,7 @@
                               mock-sources)]
     (doseq [[id spout] replacements]
       (let [spout-spec (get spouts id)]
-        (.set_spout_object spout-spec (serialize-component-object spout))))
+        (.setSpout_object spout-spec (serialize-component-object spout))))
     (doseq [spout (spout-objects spouts)]
       (when-not (extends? CompletableSpout (.getClass spout))
         (throw (RuntimeException. (str "Cannot complete topology unless every spout is a CompletableSpout (or mocked to be); failed by " spout)))))
@@ -529,7 +529,7 @@
       (while-timeout timeout-ms (not (every? exhausted? (spout-objects spouts)))
                      (simulate-wait cluster-map))
 
-      (.killTopologyWithOpts (:nimbus cluster-map) storm-name (doto (KillOptions.) (.set_wait_secs 0)))
+      (.killTopologyWithOpts (:nimbus cluster-map) storm-name (doto (KillOptions.) (.setWait_secs 0)))
       (while-timeout timeout-ms (.assignment-info state storm-id nil)
                      (simulate-wait cluster-map))
       (when cleanup-state
@@ -563,13 +563,13 @@
   ([tracked-cluster topology]
    (let [track-id (::track-id tracked-cluster)
          ret (.deepCopy topology)]
-     (dofor [[_ bolt] (.get_bolts ret)
-             :let [obj (deserialized-component-object (.get_bolt_object bolt))]]
-            (.set_bolt_object bolt (serialize-component-object
+     (dofor [[_ bolt] (.getBolts ret)
+             :let [obj (deserialized-component-object (.getBolt_object bolt))]]
+            (.setBolt_object bolt (serialize-component-object
                                      (BoltTracker. obj track-id))))
-     (dofor [[_ spout] (.get_spouts ret)
-             :let [obj (deserialized-component-object (.get_spout_object spout))]]
-            (.set_spout_object spout (serialize-component-object
+     (dofor [[_ spout] (.getSpouts ret)
+             :let [obj (deserialized-component-object (.getSpout_object spout))]]
+            (.setSpout_object spout (serialize-component-object
                                        (SpoutTracker. obj track-id))))
      {:topology ret
       :last-spout-emit (atom 0)
@@ -654,7 +654,7 @@
                         (map #(str "field" %))))
         spout-spec (mk-spout-spec* (TestWordSpout.)
                                    {stream fields})
-        topology (StormTopology. {component spout-spec} {} {})
+        topology (StormTopology. {component spout-spec} {} {} {})
         context (TopologyContext.
                   topology
                   (read-storm-config)

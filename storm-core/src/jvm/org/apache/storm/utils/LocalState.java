@@ -84,9 +84,9 @@ public class LocalState {
 
     private TBase deserialize(ThriftSerializedObject obj, TDeserializer td) {
         try {
-            Class<?> clazz = Class.forName(obj.get_name());
+            Class<?> clazz = Class.forName(obj.getName());
             TBase instance = (TBase) clazz.newInstance();
-            td.deserialize(instance, obj.get_bits());
+            td.deserialize(instance, obj.getBits());
             return instance;
         } catch(Exception e) {
             throw new RuntimeException(e);
@@ -107,7 +107,7 @@ public class LocalState {
                     }
                     LocalStateData data = new LocalStateData();
                     td.deserialize(data, serialized);
-                    result = data.get_serialized_parts();
+                    result = data.getSerialized_parts();
                 }
             }
             return result;
@@ -169,7 +169,7 @@ public class LocalState {
     public List<LSTopoHistory> getTopoHistoryList() {
         LSTopoHistoryList lsTopoHistoryListWrapper = (LSTopoHistoryList) get(LS_TOPO_HISTORY);
         if (null != lsTopoHistoryListWrapper) {
-            return lsTopoHistoryListWrapper.get_topo_history();
+            return lsTopoHistoryListWrapper.getTopo_history();
         }
         return null;
     }
@@ -182,8 +182,8 @@ public class LocalState {
         LSTopoHistoryList lsTopoHistoryListWrapper = (LSTopoHistoryList) get(LS_TOPO_HISTORY);
         List<LSTopoHistory> filteredTopoHistoryList = new ArrayList<>();
         if (null != lsTopoHistoryListWrapper) {
-            for (LSTopoHistory topoHistory : lsTopoHistoryListWrapper.get_topo_history()) {
-                if (topoHistory.get_time_stamp() > cutOffAge) {
+            for (LSTopoHistory topoHistory : lsTopoHistoryListWrapper.getTopo_history()) {
+                if (topoHistory.getTime_stamp() > cutOffAge) {
                     filteredTopoHistoryList.add(topoHistory);
                 }
             }
@@ -195,7 +195,7 @@ public class LocalState {
         LSTopoHistoryList lsTopoHistoryListWrapper = (LSTopoHistoryList) get(LS_TOPO_HISTORY);
         List<LSTopoHistory> currentTopoHistoryList = new ArrayList<>();
         if (null != lsTopoHistoryListWrapper) {
-            currentTopoHistoryList.addAll(lsTopoHistoryListWrapper.get_topo_history());
+            currentTopoHistoryList.addAll(lsTopoHistoryListWrapper.getTopo_history());
         }
         currentTopoHistoryList.add(lsTopoHistory);
         put(LS_TOPO_HISTORY, new LSTopoHistoryList(currentTopoHistoryList));
@@ -204,7 +204,7 @@ public class LocalState {
     public String getSupervisorId() {
         LSSupervisorId lsSupervisorId = (LSSupervisorId) get(LS_ID);
         if (null != lsSupervisorId) {
-            return lsSupervisorId.get_supervisor_id();
+            return lsSupervisorId.getSupervisor_id();
         }
         return null;
     }
@@ -216,7 +216,7 @@ public class LocalState {
     public Map<String, Integer> getApprovedWorkers() {
         LSApprovedWorkers lsApprovedWorkers = (LSApprovedWorkers) get(LS_APPROVED_WORKERS);
         if (null != lsApprovedWorkers) {
-            return lsApprovedWorkers.get_approved_workers();
+            return lsApprovedWorkers.getApproved_workers();
         }
         return null;
     }
@@ -236,7 +236,7 @@ public class LocalState {
     public Map<Integer, LocalAssignment> getLocalAssignmentsMap() {
         LSSupervisorAssignments assignments = (LSSupervisorAssignments) get(LS_LOCAL_ASSIGNMENTS);
         if (null != assignments) {
-            return assignments.get_assignments();
+            return assignments.getAssignments();
         }
         return null;
     }

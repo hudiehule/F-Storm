@@ -47,15 +47,15 @@ public class ThriftEncoder extends OneToOneEncoder {
         try {
             ChannelBuffer cbuffer = netty_message.buffer();
             if(cbuffer.hasArray()) {
-                message_data.set_message_blob(cbuffer.array());
+                message_data.setMessage_blob(cbuffer.array());
             }
             else {
                 byte buff[] = new byte[netty_message.encodeLength()];
                 cbuffer.readBytes(buff, 0, netty_message.encodeLength());
-                message_data.set_message_blob(buff);
+                message_data.setMessage_blob(buff);
             }
-            m.set_type(mType);
-            m.set_data(message_data);
+            m.setType(mType);
+            m.setData(message_data);
             return m;
         }
         catch( IOException e) {

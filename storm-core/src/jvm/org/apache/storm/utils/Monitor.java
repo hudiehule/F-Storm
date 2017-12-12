@@ -100,8 +100,8 @@ public class Monitor {
         HashSet<String> components = new HashSet<>();
         ClusterSummary clusterSummary = client.getClusterInfo();
         TopologySummary topologySummary = null;
-        for (TopologySummary ts: clusterSummary.get_topologies()) {
-            if (topology.equals(ts.get_name())) {
+        for (TopologySummary ts: clusterSummary.getTopologies()) {
+            if (topology.equals(ts.getName())) {
                 topologySummary = ts;
                 break;
             }
@@ -109,12 +109,12 @@ public class Monitor {
         if (topologySummary == null) {
             throw new IllegalArgumentException("topology: " + topology + " not found");
         } else {
-            String id = topologySummary.get_id();
+            String id = topologySummary.getId();
             GetInfoOptions getInfoOpts = new GetInfoOptions();
-            getInfoOpts.set_num_err_choice(NumErrorsChoice.NONE);
+            getInfoOpts.setNum_err_choice(NumErrorsChoice.NONE);
             TopologyInfo info = client.getTopologyInfoWithOpts(id, getInfoOpts);
-            for (ExecutorSummary es: info.get_executors()) {
-                components.add(es.get_component_id());
+            for (ExecutorSummary es: info.getExecutors()) {
+                components.add(es.getComponent_id());
             }
         }
         return components;
@@ -173,8 +173,8 @@ public class Monitor {
         boolean streamFound = false;
         ClusterSummary clusterSummary = client.getClusterInfo();
         TopologySummary topologySummary = null;
-        for (TopologySummary ts: clusterSummary.get_topologies()) {
-            if (_topology.equals(ts.get_name())) {
+        for (TopologySummary ts: clusterSummary.getTopologies()) {
+            if (_topology.equals(ts.getName())) {
                 topologySummary = ts;
                 break;
             }
@@ -182,17 +182,17 @@ public class Monitor {
         if (topologySummary == null) {
             throw new IllegalArgumentException("topology: " + _topology + " not found");
         } else {
-            String id = topologySummary.get_id();
+            String id = topologySummary.getId();
             GetInfoOptions getInfoOpts = new GetInfoOptions();
-            getInfoOpts.set_num_err_choice(NumErrorsChoice.NONE);
+            getInfoOpts.setNum_err_choice(NumErrorsChoice.NONE);
             TopologyInfo info = client.getTopologyInfoWithOpts(id, getInfoOpts);
-            for (ExecutorSummary es: info.get_executors()) {
-                if (_component.equals(es.get_component_id())) {
+            for (ExecutorSummary es: info.getExecutors()) {
+                if (_component.equals(es.getComponent_id())) {
                     componentParallelism ++;
-                    ExecutorStats stats = es.get_stats();
+                    ExecutorStats stats = es.getStats();
                     if (stats != null) {
                         Map<String,Map<String,Long>> statted =
-                                WATCH_EMITTED.equals(_watch) ? stats.get_emitted() : stats.get_transferred();
+                                WATCH_EMITTED.equals(_watch) ? stats.getEmitted() : stats.getTransferred();
                         if ( statted != null) {
                             Map<String, Long> e2 = statted.get(":all-time");
                             if (e2 != null) {

@@ -188,13 +188,13 @@ public class DRPCSpout extends BaseRichSpout {
                 }
                 try {
                     DRPCRequest req = client.fetchRequest(_function);
-                    if(req.get_request_id().length() > 0) {
+                    if(req.getRequest_id().length() > 0) {
                         Map returnInfo = new HashMap();
-                        returnInfo.put("id", req.get_request_id());
+                        returnInfo.put("id", req.getRequest_id());
                         returnInfo.put("host", client.getHost());
                         returnInfo.put("port", client.getPort());
                         gotRequest = true;
-                        _collector.emit(new Values(req.get_func_args(), JSONValue.toJSONString(returnInfo)), new DRPCMessageId(req.get_request_id(), i));
+                        _collector.emit(new Values(req.getFunc_args(), JSONValue.toJSONString(returnInfo)), new DRPCMessageId(req.getRequest_id(), i));
                         break;
                     }
                 } catch (AuthorizationException aze) {
@@ -213,13 +213,13 @@ public class DRPCSpout extends BaseRichSpout {
             if(drpc!=null) { // can happen during shutdown of drpc while topology is still up
                 try {
                     DRPCRequest req = drpc.fetchRequest(_function);
-                    if(req.get_request_id().length() > 0) {
+                    if(req.getRequest_id().length() > 0) {
                         Map returnInfo = new HashMap();
-                        returnInfo.put("id", req.get_request_id());
+                        returnInfo.put("id", req.getRequest_id());
                         returnInfo.put("host", _local_drpc_id);
                         returnInfo.put("port", 0);
                         gotRequest = true;
-                        _collector.emit(new Values(req.get_func_args(), JSONValue.toJSONString(returnInfo)), new DRPCMessageId(req.get_request_id(), 0));
+                        _collector.emit(new Values(req.getFunc_args(), JSONValue.toJSONString(returnInfo)), new DRPCMessageId(req.getRequest_id(), 0));
                     }
                 } catch (AuthorizationException aze) {
                     throw new RuntimeException(aze);

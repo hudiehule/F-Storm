@@ -200,7 +200,7 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
     public Map<String, Map<String, List<String>>> getThisInputFields() {
     	Map<String, Map<String, List<String>>> outputMap = new HashMap<>();
         for (Map.Entry<GlobalStreamId, Grouping> entry : this.getThisSources().entrySet()) {
-        	String componentId = entry.getKey().get_componentId();
+        	String componentId = entry.getKey().getComponentId();
         	Set<String> streams = getComponentStreams(componentId);
         	for (String stream : streams) {
         		Map<String, List<String>> streamFieldMap = outputMap.get(componentId);
@@ -260,8 +260,8 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
 	private static Map<String, Object> groupingToJSONableMap(Grouping grouping) {
 		Map<String, Object> groupingMap = new HashMap<>();
 		groupingMap.put("type", grouping.getSetField().toString());
-		if (grouping.is_set_fields()) {
-			groupingMap.put("fields", grouping.get_fields());
+		if (grouping.isSetFields()) {
+			groupingMap.put("fields", grouping.getFields());
 		}
 		return groupingMap;
 	}
@@ -290,12 +290,12 @@ public class TopologyContext extends WorkerTopologyContext implements IMetricsCo
         Map<String, Map<String, Object>> stringSources = new HashMap<>();
         for (Map.Entry<GlobalStreamId, Grouping> entry : this.getThisSources().entrySet()) {
         	GlobalStreamId gid = entry.getKey();
-        	Map<String, Object> stringSourceMap = stringSources.get(gid.get_componentId());
+        	Map<String, Object> stringSourceMap = stringSources.get(gid.getComponentId());
         	if (stringSourceMap == null) {
         		stringSourceMap = new HashMap<>();
-        		stringSources.put(gid.get_componentId(), stringSourceMap);
+        		stringSources.put(gid.getComponentId(), stringSourceMap);
         	}
-        	stringSourceMap.put(gid.get_streamId(), groupingToJSONableMap(entry.getValue()));        	
+        	stringSourceMap.put(gid.getStreamId(), groupingToJSONableMap(entry.getValue()));
         }
         obj.put("source->stream->grouping", stringSources);
         obj.put("source->stream->fields", this.getThisInputFields());

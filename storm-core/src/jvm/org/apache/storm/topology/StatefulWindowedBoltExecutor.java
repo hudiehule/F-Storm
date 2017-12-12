@@ -156,7 +156,7 @@ public class StatefulWindowedBoltExecutor<T extends State> extends WindowedBoltE
         statefulWindowedBolt.initState((T) state);
         // query the streamState for each input task stream and compute recoveryStates
         for (GlobalStreamId streamId : topologyContext.getThisSources().keySet()) {
-            for (int taskId : topologyContext.getComponentTasks(streamId.get_componentId())) {
+            for (int taskId : topologyContext.getComponentTasks(streamId.getComponentId())) {
                 WindowState windowState = streamState.get(new TaskStream(taskId, streamId));
                 if (windowState != null) {
                     recoveryStates.put(new TaskStream(taskId, streamId), windowState);

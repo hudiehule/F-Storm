@@ -34,8 +34,8 @@
 
 (defn instantiate-java-object
   [^JavaObject obj]
-  (let [name (symbol (.get_full_class_name obj))
-        args (map (memfn getFieldValue) (.get_args_list obj))]
+  (let [name (symbol (.getFull_class_name obj))
+        args (map (memfn getFieldValue) (.getArgs_list obj))]
     (eval `(new ~name ~@args))))
 
 (def grouping-constants
@@ -56,7 +56,7 @@
   [^Grouping grouping]
   (when-not (= (grouping-type grouping) :fields)
     (throw (IllegalArgumentException. "Tried to get grouping fields from non fields grouping")))
-  (.get_fields grouping))
+  (.getFields grouping))
 
 (defn global-grouping?
   [^Grouping grouping]
@@ -65,8 +65,8 @@
 
 (defn parallelism-hint
   [^ComponentCommon component-common]
-  (let [phint (.get_parallelism_hint component-common)]
-    (if-not (.is_set_parallelism_hint component-common) 1 phint)))
+  (let [phint (.getParallelism_hint component-common)]
+    (if-not (.isSetParallelism_hint component-common) 1 phint)))
 
 (defn nimbus-client-and-conn
   ([host port]
@@ -123,9 +123,9 @@
   [inputs output-spec parallelism-hint :conf nil]
   (let [ret (ComponentCommon. (HashMap. inputs) (HashMap. (mk-output-spec output-spec)))]
     (when parallelism-hint
-      (.set_parallelism_hint ret parallelism-hint))
+      (.setParallelism_hint ret parallelism-hint))
     (when conf
-      (.set_json_conf ret (to-json conf)))
+      (.setJson_conf ret (to-json conf)))
     ret))
 
 (defnk mk-spout-spec*
@@ -165,7 +165,7 @@
   [^ComponentObject obj]
   (when (not= (.getSetField obj) ComponentObject$_Fields/SERIALIZED_JAVA)
     (throw (RuntimeException. "Cannot deserialize non-java-serialized object")))
-  (Utils/javaDeserialize (.get_serialized_java obj) Serializable))
+  (Utils/javaDeserialize (.getSerialized_java obj) Serializable))
 
 (defn serialize-component-object
   [obj]

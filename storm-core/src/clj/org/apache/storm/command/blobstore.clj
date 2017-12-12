@@ -90,7 +90,7 @@
                                                   ["-a" "--acl" :default [] :parse-fn as-acl]
                                                   ["-r" "--replication-factor" :default -1 :parse-fn parse-int])
         meta (doto (SettableBlobMeta. acl)
-                   (.set_replication_factor replication-factor))]
+                   (.setReplication_factor replication-factor))]
     (validate-key-name! key)
     (log-message "Creating " key " with ACL " (pr-str (map access-control-str acl)))
     (if file
@@ -111,8 +111,8 @@
       (doseq [key keys]
         (try
           (let [meta (.getBlobMeta blobstore key)
-                version (.get_version meta)
-                acl (.get_acl (.get_settable meta))]
+                version (.getVersion meta)
+                acl (.getAcl (.getSettable meta))]
             (log-message key " " version " " (pr-str (map access-control-str acl))))
           (catch AuthorizationException ae
             (if-not (empty? args) (log-error "ACCESS DENIED to key: " key)))
@@ -124,7 +124,7 @@
            (cli args ["-s" "--set" :default [] :parse-fn as-acl])]
     (with-configured-blob-client blobstore
       (let [meta (.getBlobMeta blobstore key)
-            acl (.get_acl (.get_settable meta))
+            acl (.getAcl (.getSettable meta))
             new-acl (if set-acl set-acl acl)
             new-meta (SettableBlobMeta. new-acl)]
         (log-message "Setting ACL for " key " to " (pr-str (map access-control-str new-acl)))

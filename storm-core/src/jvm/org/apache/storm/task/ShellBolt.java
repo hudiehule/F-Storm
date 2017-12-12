@@ -92,7 +92,7 @@ public class ShellBolt implements IBolt {
     private AtomicBoolean sendHeartbeatFlag = new AtomicBoolean(false);
 
     public ShellBolt(ShellComponent component) {
-        this(component.get_execution_command(), component.get_script());
+        this(component.getExecution_command(), component.getScript());
     }
 
     public ShellBolt(String... command) {

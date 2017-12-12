@@ -70,10 +70,10 @@ public class TridentUtils {
             throw new RuntimeException("Trident only supports components that emit a single stream");
         }
         StreamInfo si = declaration.values().iterator().next();
-        if(si.is_direct()) {
+        if(si.isDirect()) {
             throw new RuntimeException("Trident does not support direct streams");
         }
-        return new Fields(si.get_output_fields());        
+        return new Fields(si.getOutput_fields());
     }
     
     /**

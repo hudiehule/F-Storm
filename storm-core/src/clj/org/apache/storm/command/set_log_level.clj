@@ -24,10 +24,10 @@
   "Get topology id for a running topology from the topology name."
   [nimbus name]
   (let [info (.getClusterInfo nimbus)
-        topologies (.get_topologies info)
-        topology (first (filter (fn [topo] (= name (.get_name topo))) topologies))]
+        topologies (.getTopologies info)
+        topology (first (filter (fn [topo] (= name (.getName topo))) topologies))]
     (if topology 
-      (.get_id topology)
+      (.getId topology)
       (throw (.IllegalArgumentException (str name " is not a running topology"))))))
 
 (defn- parse-named-log-levels [action]
@@ -45,11 +45,11 @@
           timeout-str (nth log-args 3)
           log-level (LogLevel.)]
       (if (= action LogLevelAction/REMOVE)
-        (.set_action log-level action)
+        (.setAction log-level action)
         (do
-          (.set_action log-level action)
-          (.set_target_log_level log-level (.toString level))
-          (.set_reset_log_level_timeout_secs log-level
+          (.setAction log-level action)
+          (.setTarget_log_level log-level (.toString level))
+          (.setReset_log_level_timeout_secs log-level
             (Integer. (if (= timeout-str "") "0" timeout-str)))))
       {name log-level})))
 
@@ -69,7 +69,7 @@
                    :assoc-fn merge-together])
         log-config (LogConfig.)]
     (doseq [[log-name log-val] (merge log-setting remove-log-setting)]
-      (.put_to_named_logger_level log-config log-name log-val))
+      (.putToNamed_logger_level log-config log-name log-val))
     (log-message "Sent log config " log-config " for topology " name)
     (with-configured-nimbus-connection nimbus
       (.setLogConfig nimbus (get-storm-id nimbus name) log-config))))

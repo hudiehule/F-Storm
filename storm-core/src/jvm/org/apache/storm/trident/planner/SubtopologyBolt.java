@@ -128,7 +128,7 @@ public class SubtopologyBolt implements ITridentBatchBolt {
 
     private Fields getSourceOutputFields(TopologyContext context, String sourceStream) {
         for(GlobalStreamId g: context.getThisSources().keySet()) {
-            if(g.get_streamId().equals(sourceStream)) {
+            if(g.getStreamId().equals(sourceStream)) {
                 return context.getComponentOutputFields(g);
             }
         }

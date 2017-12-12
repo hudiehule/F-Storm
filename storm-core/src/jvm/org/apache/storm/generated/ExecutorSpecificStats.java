@@ -168,7 +168,7 @@ public class ExecutorSpecificStats extends org.apache.thrift.TUnion<ExecutorSpec
         if (value instanceof AccBolt) {
           break;
         }
-        throw new ClassCastException("Was expecting value of type AccBolt for field 'accBolt', but got " + value.getClass().getSimpleName());
+        throw new ClassCastException("Was expecting value of type AcceleratorBolt for field 'accBolt', but got " + value.getClass().getSimpleName());
       default:
         throw new IllegalArgumentException("Unknown field id " + setField);
     }

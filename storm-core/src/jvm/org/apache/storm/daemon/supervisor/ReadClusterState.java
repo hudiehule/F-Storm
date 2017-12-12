@@ -152,9 +152,9 @@ public class ReadClusterState implements Runnable, AutoCloseable {
                 String topoId = entry.getKey();
                 if (entry.getValue() != null) {
                     for (ProfileRequest req: entry.getValue()) {
-                        NodeInfo ni = req.get_nodeInfo();
-                        if (host.equals(ni.get_node())) {
-                            Long port = ni.get_port().iterator().next();
+                        NodeInfo ni = req.getNodeInfo();
+                        if (host.equals(ni.getNode())) {
+                            Long port = ni.getPort().iterator().next();
                             Set<TopoProfileAction> actions = filtered.get(port);
                             if (actions == null) {
                                 actions = new HashSet<>();
@@ -253,32 +253,32 @@ public class ReadClusterState implements Runnable, AutoCloseable {
     protected Map<Integer, LocalAssignment> readMyExecutors(String stormId, String assignmentId, Assignment assignment) {
         Map<Integer, LocalAssignment> portTasks = new HashMap<>();
         Map<Long, WorkerResources> slotsResources = new HashMap<>();
-        Map<NodeInfo, WorkerResources> nodeInfoWorkerResourcesMap = assignment.get_worker_resources();
+        Map<NodeInfo, WorkerResources> nodeInfoWorkerResourcesMap = assignment.getWorker_resources();
         if (nodeInfoWorkerResourcesMap != null) {
             for (Map.Entry<NodeInfo, WorkerResources> entry : nodeInfoWorkerResourcesMap.entrySet()) {
-                if (entry.getKey().get_node().equals(assignmentId)) {
-                    Set<Long> ports = entry.getKey().get_port();
+                if (entry.getKey().getNode().equals(assignmentId)) {
+                    Set<Long> ports = entry.getKey().getPort();
                     for (Long port : ports) {
                         slotsResources.put(port, entry.getValue());
                     }
                 }
             }
         }
-        Map<List<Long>, NodeInfo> executorNodePort = assignment.get_executor_node_port();
+        Map<List<Long>, NodeInfo> executorNodePort = assignment.getExecutor_node_port();
         if (executorNodePort != null) {
             for (Map.Entry<List<Long>, NodeInfo> entry : executorNodePort.entrySet()) {
-                if (entry.getValue().get_node().equals(assignmentId)) {
-                    for (Long port : entry.getValue().get_port()) {
+                if (entry.getValue().getNode().equals(assignmentId)) {
+                    for (Long port : entry.getValue().getPort()) {
                         LocalAssignment localAssignment = portTasks.get(port.intValue());
                         if (localAssignment == null) {
                             List<ExecutorInfo> executors = new ArrayList<>();
                             localAssignment = new LocalAssignment(stormId, executors);
                             if (slotsResources.containsKey(port)) {
-                                localAssignment.set_resources(slotsResources.get(port));
+                                localAssignment.setResources(slotsResources.get(port));
                             }
                             portTasks.put(port.intValue(), localAssignment);
                         }
-                        List<ExecutorInfo> executorInfoList = localAssignment.get_executors();
+                        List<ExecutorInfo> executorInfoList = localAssignment.getExecutors();
                         executorInfoList.add(new ExecutorInfo(entry.getKey().get(0).intValue(), entry.getKey().get(entry.getKey().size() - 1).intValue()));
                     }
                 }

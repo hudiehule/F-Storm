@@ -49,13 +49,13 @@ public class ThriftTopologyUtils {
                 if(componentMap.containsKey(componentId)) {
                     Object component = componentMap.get(componentId);
                     if(component instanceof Bolt) {
-                        return ((Bolt) component).get_common();
+                        return ((Bolt) component).getCommon();
                     }
                     if(component instanceof SpoutSpec) {
-                        return ((SpoutSpec) component).get_common();
+                        return ((SpoutSpec) component).getCommon();
                     }
                     if(component instanceof StateSpoutSpec) {
-                        return ((StateSpoutSpec) component).get_common();
+                        return ((StateSpoutSpec) component).getCommon();
                     }
                     throw new RuntimeException("Unreachable code! No get_common conversion for component " + component);
                 }

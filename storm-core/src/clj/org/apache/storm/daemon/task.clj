@@ -68,14 +68,14 @@
    tid))
 
 (defn- get-task-object [^StormTopology topology component-id]
-  (let [spouts (.get_spouts topology)
-        bolts (.get_bolts topology)
-        state-spouts (.get_state_spouts topology)
+  (let [spouts (.getSpouts topology)
+        bolts (.getBolts topology)
+        state-spouts (.getState_spouts topology)
         obj (Utils/getSetComponentObject
              (cond
-              (contains? spouts component-id) (.get_spout_object ^SpoutSpec (get spouts component-id))
-              (contains? bolts component-id) (.get_bolt_object ^Bolt (get bolts component-id))
-              (contains? state-spouts component-id) (.get_state_spout_object ^StateSpoutSpec (get state-spouts component-id))
+              (contains? spouts component-id) (.getSpout_object ^SpoutSpec (get spouts component-id))
+              (contains? bolts component-id) (.getBolt_object ^Bolt (get bolts component-id))
+              (contains? state-spouts component-id) (.getState_spout_object ^StateSpoutSpec (get state-spouts component-id))
               true (throw-runtime "Could not find " component-id " in " topology)))
         obj (if (instance? ShellComponent obj)
               (if (contains? spouts component-id)

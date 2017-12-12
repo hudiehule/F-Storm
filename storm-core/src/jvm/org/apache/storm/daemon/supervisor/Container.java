@@ -127,7 +127,7 @@ public abstract class Container implements Killable {
         } else {
             assert(assignment != null);
             assert(port > 0);
-            _topologyId = assignment.get_topology_id();
+            _topologyId = assignment.getTopology_id();
             if (!_ops.doRequiredTopoFilesExist(_conf, _topologyId)) {
                 LOG.info("Missing topology storm code, so can't launch  worker with assignment {} for this supervisor {} on port {} with id {}", _assignment,
                         _supervisorId, _port, _workerId);

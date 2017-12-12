@@ -124,7 +124,7 @@ public class TridentTopologyBuilder {
         //this takes care of setting up coord streams for spouts and bolts
         for(GlobalStreamId s: _batchIds.keySet()) {
             String b = _batchIds.get(s);
-            ret.put(new GlobalStreamId(s.get_componentId(), TridentBoltExecutor.COORD_STREAM(b)), b);
+            ret.put(new GlobalStreamId(s.getComponentId(), TridentBoltExecutor.COORD_STREAM(b)), b);
         }
         
         return ret;
@@ -229,12 +229,12 @@ public class TridentTopologyBuilder {
                 if(!specs.containsKey(batch)) specs.put(batch, new CoordSpec());
                 CoordSpec spec = specs.get(batch);
                 CoordType ct;
-                if(_batchPerTupleSpouts.containsKey(s.get_componentId())) {
+                if(_batchPerTupleSpouts.containsKey(s.getComponentId())) {
                     ct = CoordType.single();
                 } else {
                     ct = CoordType.all();
                 }
-                spec.coords.put(s.get_componentId(), ct);
+                spec.coords.put(s.getComponentId(), ct);
             }
             
             for(String b: c.committerBatches) {
@@ -330,7 +330,7 @@ public class TridentTopologyBuilder {
         for(GlobalStreamId s: getBoltSubscriptionStreams(id)) {
             String b = _batchIds.get(s);
             if(!ret.containsKey(b)) ret.put(b, new HashSet());
-            ret.get(b).add(s.get_componentId());
+            ret.get(b).add(s.getComponentId());
         }
         return ret;
     }
@@ -727,12 +727,12 @@ public class TridentTopologyBuilder {
 
                 @Override
                 public String getComponent() {
-                    return stream.get_componentId();
+                    return stream.getComponentId();
                 }                
 
                 @Override
                 public String getStream() {
-                    return stream.get_streamId();
+                    return stream.getStreamId();
                 }
             });
             return this;

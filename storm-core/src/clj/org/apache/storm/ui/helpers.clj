@@ -125,7 +125,7 @@
     (to-array (map #(url-encode (str %)) args))))
 
 (defn pretty-executor-info [^ExecutorInfo e]
-  (str "[" (.get_task_start e) "-" (.get_task_end e) "]"))
+  (str "[" (.getTask_start e) "-" (.getTask_end e) "]"))
 
 (defn unauthorized-user-json
   [user]

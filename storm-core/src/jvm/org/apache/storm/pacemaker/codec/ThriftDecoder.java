@@ -54,12 +54,12 @@ public class ThriftDecoder extends FrameDecoder {
         buf.readBytes(serialized, 0, thriftLen);
         HBMessage m = (HBMessage)Utils.thriftDeserialize(HBMessage.class, serialized);
 
-        if(m.get_type() == HBServerMessageType.CONTROL_MESSAGE) {
-            ControlMessage cm = ControlMessage.read(m.get_data().get_message_blob());
+        if(m.getType() == HBServerMessageType.CONTROL_MESSAGE) {
+            ControlMessage cm = ControlMessage.read(m.getData().getMessage_blob());
             return cm;
         }
-        else if(m.get_type() == HBServerMessageType.SASL_MESSAGE_TOKEN) {
-            SaslMessageToken sm = SaslMessageToken.read(m.get_data().get_message_blob());
+        else if(m.getType() == HBServerMessageType.SASL_MESSAGE_TOKEN) {
+            SaslMessageToken sm = SaslMessageToken.read(m.getData().getMessage_blob());
             return sm;
         }
         else {

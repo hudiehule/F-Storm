@@ -119,9 +119,9 @@ public class BlobStoreAclHandler {
             access = parts[2];
         }
         AccessControl ret = new AccessControl();
-        ret.set_type(parseACLType(type));
-        ret.set_name(name);
-        ret.set_access(parseAccess(access));
+        ret.setType(parseACLType(type));
+        ret.setName(name);
+        ret.setAccess(parseAccess(access));
         return ret;
     }
 
@@ -135,7 +135,7 @@ public class BlobStoreAclHandler {
 
     public static String accessControlToString(AccessControl ac) {
         StringBuilder ret = new StringBuilder();
-        switch(ac.get_type()) {
+        switch(ac.getType()) {
             case OTHER:
                 ret.append("o");
                 break;
@@ -143,14 +143,14 @@ public class BlobStoreAclHandler {
                 ret.append("u");
                 break;
             default:
-                throw new IllegalArgumentException("Don't know what a type of "+ac.get_type()+" means ");
+                throw new IllegalArgumentException("Don't know what a type of "+ac.getType()+" means ");
         }
         ret.append(":");
-        if (ac.is_set_name()) {
-            ret.append(ac.get_name());
+        if (ac.isSetName()) {
+            ret.append(ac.getName());
         }
         ret.append(":");
-        ret.append(accessToString(ac.get_access()));
+        ret.append(accessToString(ac.getAccess()));
         return ret.toString();
     }
 
@@ -158,7 +158,7 @@ public class BlobStoreAclHandler {
         Set<String> aclUsers = new HashSet<>();
         List<String> duplicateUsers = new ArrayList<>();
         for (AccessControl acl : acls) {
-            String aclUser = acl.get_name();
+            String aclUser = acl.getName();
             if (!StringUtils.isEmpty(aclUser) && !aclUsers.add(aclUser)) {
                 LOG.error("'{}' user can't appear more than once in the ACLs", aclUser);
                 duplicateUsers.add(aclUser);
@@ -303,7 +303,7 @@ public class BlobStoreAclHandler {
     }
 
     public void normalizeSettableBlobMeta(String key, SettableBlobMeta meta, Subject who, int opMask) {
-        meta.set_acl(normalizeSettableACLs(key, meta.get_acl(), who, opMask));
+        meta.setAcl(normalizeSettableACLs(key, meta.getAcl(), who, opMask));
     }
 
     private String namedPerms(int mask) {
@@ -323,12 +323,12 @@ public class BlobStoreAclHandler {
     }
 
     private int getAllowed(AccessControl ac, Set<String> users) {
-        switch (ac.get_type()) {
+        switch (ac.getType()) {
             case OTHER:
-                return ac.get_access();
+                return ac.getAccess();
             case USER:
-                if (users.contains(ac.get_name())) {
-                    return ac.get_access();
+                if (users.contains(ac.getName())) {
+                    return ac.getAccess();
                 }
                 return 0;
             default:
@@ -339,7 +339,7 @@ public class BlobStoreAclHandler {
     private List<AccessControl> removeBadACLs(List<AccessControl> accessControls) {
         List<AccessControl> resultAcl = new ArrayList<AccessControl>();
         for (AccessControl control : accessControls) {
-            if(control.get_type().equals(AccessControlType.OTHER) && (control.get_access() == 0 )) {
+            if(control.getType().equals(AccessControlType.OTHER) && (control.getAccess() == 0 )) {
                 LOG.debug("Removing invalid blobstore world ACL " +
                         BlobStoreAclHandler.accessControlToString(control));
                 continue;
@@ -368,7 +368,7 @@ public class BlobStoreAclHandler {
     private boolean worldEverything(List<AccessControl> acls) {
         boolean isWorldEverything = false;
         for (AccessControl acl : acls) {
-            if (acl.get_type() == AccessControlType.OTHER && acl.get_access() == (READ|WRITE|ADMIN)) {
+            if (acl.getType() == AccessControlType.OTHER && acl.getAccess() == (READ|WRITE|ADMIN)) {
                 isWorldEverything = true;
                 break;
             }
@@ -379,10 +379,10 @@ public class BlobStoreAclHandler {
     private void fixACLsForUser(List<AccessControl> acls, String user, int mask) {
         boolean foundUserACL = false;
         for (AccessControl control : acls) {
-            if (control.get_type() == AccessControlType.USER && control.get_name().equals(user)) {
-                int currentAccess = control.get_access();
+            if (control.getType() == AccessControlType.USER && control.getName().equals(user)) {
+                int currentAccess = control.getAccess();
                 if ((currentAccess & mask) != mask) {
-                    control.set_access(currentAccess | mask);
+                    control.setAccess(currentAccess | mask);
                 }
                 foundUserACL = true;
                 break;
@@ -390,9 +390,9 @@ public class BlobStoreAclHandler {
         }
         if (!foundUserACL) {
             AccessControl userACL = new AccessControl();
-            userACL.set_type(AccessControlType.USER);
-            userACL.set_name(user);
-            userACL.set_access(mask);
+            userACL.setType(AccessControlType.USER);
+            userACL.setName(user);
+            userACL.setAccess(mask);
             acls.add(userACL);
         }
     }

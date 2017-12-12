@@ -58,7 +58,7 @@
 (defn with-topology* [cluster storm-topo body-fn]
   (t/submit-local-topology (:nimbus cluster) "tester" {} storm-topo)
   (body-fn)
-  (.killTopologyWithOpts (:nimbus cluster) "tester" (doto (KillOptions.) (.set_wait_secs 0))))
+  (.killTopologyWithOpts (:nimbus cluster) "tester" (doto (KillOptions.) (.setWait_secs 0))))
 
 (defmacro with-topology [[cluster topo storm-topo] & body]
   `(let [~storm-topo (.build ~topo)]

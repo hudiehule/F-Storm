@@ -25,28 +25,28 @@
   (:gen-class))
 
 (defn get-topology-id [name topologies]
-  (let [topology (first (filter #(= (.get_name %1) name) topologies))]
-    (when (not-nil? topology) (.get_id topology))))
+  (let [topology (first (filter #(= (.getName %1) name) topologies))]
+    (when (not-nil? topology) (.getId topology))))
 
 (defn get-component-errors
   [topology-errors]
   (apply hash-map (remove nil?
                     (flatten (for [[comp-name comp-errors] topology-errors]
                                (let [latest-error (when (not (empty? comp-errors)) (first comp-errors))]
-                                 (if latest-error [comp-name (.get_error ^ErrorInfo latest-error)])))))))
+                                 (if latest-error [comp-name (.getError ^ErrorInfo latest-error)])))))))
 
 (defn -main [name]
   (with-configured-nimbus-connection nimbus
     (let [opts (doto (GetInfoOptions.)
-                 (.set_num_err_choice NumErrorsChoice/ONE))
+                 (.setNum_err_choice NumErrorsChoice/ONE))
           cluster-info (.getClusterInfo nimbus)
-          topologies (.get_topologies cluster-info)
+          topologies (.getTopologies cluster-info)
           topo-id (get-topology-id name topologies)
           topo-info (when (not-nil? topo-id) (.getTopologyInfoWithOpts nimbus topo-id opts))]
       (if (or (nil? topo-id) (nil? topo-info))
         (println (to-json {"Failure" (str "No topologies running with name " name)}))
-        (let [topology-name (.get_name topo-info)
-              topology-errors (.get_errors topo-info)]
+        (let [topology-name (.getName topo-info)
+              topology-errors (.getErrors topo-info)]
           (println (to-json (hash-map
                               "Topology Name" topology-name
                               "Comp-Errors" (get-component-errors topology-errors)))))))))

@@ -45,13 +45,13 @@ public class SupervisorHeartbeat implements Runnable {
 
     private SupervisorInfo buildSupervisorInfo(Map<String, Object> conf, Supervisor supervisor) {
         SupervisorInfo supervisorInfo = new SupervisorInfo();
-        supervisorInfo.set_time_secs(Time.currentTimeSecs());
-        supervisorInfo.set_hostname(supervisor.getHostName());
-        supervisorInfo.set_assignment_id(supervisor.getAssignmentId());
+        supervisorInfo.setTime_secs(Time.currentTimeSecs());
+        supervisorInfo.setHostname(supervisor.getHostName());
+        supervisorInfo.setAssignment_id(supervisor.getAssignmentId());
 
         List<Long> usedPorts = new ArrayList<>();
         usedPorts.addAll(supervisor.getCurrAssignment().get().keySet());
-        supervisorInfo.set_used_ports(usedPorts);
+        supervisorInfo.setUsed_ports(usedPorts);
         List metaDatas = (List)supervisor.getiSupervisor().getMetadata();
         List<Long> portList = new ArrayList<>();
         if (metaDatas != null){
@@ -62,11 +62,11 @@ public class SupervisorHeartbeat implements Runnable {
             }
         }
 
-        supervisorInfo.set_meta(portList);
-        supervisorInfo.set_scheduler_meta((Map<String, String>) conf.get(Config.SUPERVISOR_SCHEDULER_META));
-        supervisorInfo.set_uptime_secs(supervisor.getUpTime().upTime());
-        supervisorInfo.set_version(supervisor.getStormVersion());
-        supervisorInfo.set_resources_map(mkSupervisorCapacities(conf));
+        supervisorInfo.setMeta(portList);
+        supervisorInfo.setScheduler_meta((Map<String, String>) conf.get(Config.SUPERVISOR_SCHEDULER_META));
+        supervisorInfo.setUptime_secs(supervisor.getUpTime().upTime());
+        supervisorInfo.setVersion(supervisor.getStormVersion());
+        supervisorInfo.setResources_map(mkSupervisorCapacities(conf));
         return supervisorInfo;
     }
 

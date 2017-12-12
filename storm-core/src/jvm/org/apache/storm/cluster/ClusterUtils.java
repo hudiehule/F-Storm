@@ -191,12 +191,12 @@ public class ClusterUtils {
      */
     public static Map<ExecutorInfo, ExecutorBeat> convertExecutorBeats(List<ExecutorInfo> executors, ClusterWorkerHeartbeat workerHeartbeat) {
         Map<ExecutorInfo, ExecutorBeat> executorWhb = new HashMap<>();
-        Map<ExecutorInfo, ExecutorStats> executorStatsMap = workerHeartbeat.get_executor_stats();
+        Map<ExecutorInfo, ExecutorStats> executorStatsMap = workerHeartbeat.getExecutor_stats();
         for (ExecutorInfo executor : executors) {
             if (executorStatsMap.containsKey(executor)) {
-                int time = workerHeartbeat.get_time_secs();
-                int uptime = workerHeartbeat.get_uptime_secs();
-                ExecutorStats executorStats = workerHeartbeat.get_executor_stats().get(executor);
+                int time = workerHeartbeat.getTime_secs();
+                int uptime = workerHeartbeat.getUptime_secs();
+                ExecutorStats executorStats = workerHeartbeat.getExecutor_stats().get(executor);
                 ExecutorBeat executorBeat = new ExecutorBeat(time, uptime, executorStats);
                 executorWhb.put(executor, executorBeat);
             }

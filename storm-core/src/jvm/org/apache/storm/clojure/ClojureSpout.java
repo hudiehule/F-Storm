@@ -119,7 +119,7 @@ public class ClojureSpout implements IRichSpout {
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
         for(String stream: _fields.keySet()) {
             StreamInfo info = _fields.get(stream);
-            declarer.declareStream(stream, info.is_direct(), new Fields(info.get_output_fields()));
+            declarer.declareStream(stream, info.isDirect(), new Fields(info.getOutput_fields()));
         }
     }
     

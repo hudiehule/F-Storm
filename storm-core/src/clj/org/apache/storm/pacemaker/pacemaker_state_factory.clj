@@ -77,9 +77,9 @@
                        (HBMessage. HBServerMessageType/SEND_PULSE
                                    (HBMessageData/pulse
                                     (doto (HBPulse.)
-                                      (.set_id path)
-                                      (.set_details data)))))]
-            (if (= (.get_type response) HBServerMessageType/SEND_PULSE_RESPONSE)
+                                      (.setId path)
+                                      (.setDetails data)))))]
+            (if (= (.getType response) HBServerMessageType/SEND_PULSE_RESPONSE)
               :ok
               (throw (HBExecutionException. "Invalid Response Type"))))))
 
@@ -91,7 +91,7 @@
                 (.send pacemaker-client
                        (HBMessage. HBServerMessageType/DELETE_PATH
                                    (HBMessageData/path path)))]
-            (if (= (.get_type response) HBServerMessageType/DELETE_PATH_RESPONSE)
+            (if (= (.getType response) HBServerMessageType/DELETE_PATH_RESPONSE)
               :ok
               (throw (HBExecutionException. "Invalid Response Type"))))))
       
@@ -103,9 +103,9 @@
                 (.send pacemaker-client
                        (HBMessage. HBServerMessageType/GET_PULSE
                                    (HBMessageData/path path)))]
-            (if (= (.get_type response) HBServerMessageType/GET_PULSE_RESPONSE)
+            (if (= (.getType response) HBServerMessageType/GET_PULSE_RESPONSE)
               (try 
-                (.get_details (.get_pulse (.get_data response)))
+                (.getDetails (.getPulse (.getData response)))
                 (catch Exception e
                   (throw (HBExecutionException. (.toString e)))))
               (throw (HBExecutionException. "Invalid Response Type"))))))
@@ -118,9 +118,9 @@
                 (.send pacemaker-client
                        (HBMessage. HBServerMessageType/GET_ALL_NODES_FOR_PATH
                                    (HBMessageData/path path)))]
-            (if (= (.get_type response) HBServerMessageType/GET_ALL_NODES_FOR_PATH_RESPONSE)
+            (if (= (.getType response) HBServerMessageType/GET_ALL_NODES_FOR_PATH_RESPONSE)
               (try
-                (into [] (.get_pulseIds (.get_nodes (.get_data response))))
+                (into [] (.getPulseIds (.getNodes (.getData response))))
                 (catch Exception e
                   (throw (HBExecutionException. (.toString e)))))
               (throw (HBExecutionException. "Invalid Response Type"))))))

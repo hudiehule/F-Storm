@@ -55,20 +55,20 @@ public class NimbusBlobStore extends ClientBlobStore {
 
         public NimbusKeyIterator(ListBlobsResult listBlobs) {
             this.listBlobs = listBlobs;
-            this.eof = (listBlobs.get_keys_size() == 0);
+            this.eof = (listBlobs.getKeysSize() == 0);
         }
 
         private boolean isCacheEmpty() {
-            return listBlobs.get_keys_size() <= offset;
+            return listBlobs.getKeysSize() <= offset;
         }
 
         private void readMore() throws TException {
             if (!eof) {
                 offset = 0;
                 synchronized(client) {
-                    listBlobs = client.getClient().listBlobs(listBlobs.get_session());
+                    listBlobs = client.getClient().listBlobs(listBlobs.getSession());
                 }
-                if (listBlobs.get_keys_size() == 0) {
+                if (listBlobs.getKeysSize() == 0) {
                     eof = true;
                 }
             }
@@ -91,7 +91,7 @@ public class NimbusBlobStore extends ClientBlobStore {
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
-            String ret = listBlobs.get_keys().get(offset);
+            String ret = listBlobs.getKeys().get(offset);
             offset++;
             return ret;
         }
@@ -115,7 +115,7 @@ public class NimbusBlobStore extends ClientBlobStore {
 
         @Override
         public long getVersion() throws IOException {
-            return beginBlobDownload.get_version();
+            return beginBlobDownload.getVersion();
         }
 
         @Override
@@ -165,7 +165,7 @@ public class NimbusBlobStore extends ClientBlobStore {
             if (!eof) {
                 ByteBuffer buff;
                 synchronized(client) {
-                    buff = client.getClient().downloadBlobChunk(beginBlobDownload.get_session());
+                    buff = client.getClient().downloadBlobChunk(beginBlobDownload.getSession());
                 }
                 buffer = buff.array();
                 offset = buff.arrayOffset() + buff.position();
@@ -189,7 +189,7 @@ public class NimbusBlobStore extends ClientBlobStore {
 
         @Override
         public long getFileLength() {
-            return beginBlobDownload.get_data_size();
+            return beginBlobDownload.getData_size();
         }
     }
 

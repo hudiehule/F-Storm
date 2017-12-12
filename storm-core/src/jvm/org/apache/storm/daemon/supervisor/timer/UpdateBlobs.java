@@ -61,7 +61,7 @@ public class UpdateBlobs implements Runnable {
             AtomicReference<Map<Long, LocalAssignment>> newAssignment = supervisor.getCurrAssignment();
             Set<String> assignedStormIds = new HashSet<>();
             for (LocalAssignment localAssignment : newAssignment.get().values()) {
-                assignedStormIds.add(localAssignment.get_topology_id());
+                assignedStormIds.add(localAssignment.getTopology_id());
             }
             for (String stormId : downloadedStormIds) {
                 if (assignedStormIds.contains(stormId)) {

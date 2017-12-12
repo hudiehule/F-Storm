@@ -101,8 +101,8 @@ public class LocalFsBlobStore extends BlobStore {
         LOG.debug("Creating Blob for key {}", key);
         validateKey(key);
         _aclHandler.normalizeSettableBlobMeta(key, meta, who, allPermissions);
-        BlobStoreAclHandler.validateSettableACLs(key, meta.get_acl());
-        _aclHandler.hasPermissions(meta.get_acl(), allPermissions, who, key);
+        BlobStoreAclHandler.validateSettableACLs(key, meta.getAcl());
+        _aclHandler.hasPermissions(meta.getAcl(), allPermissions, who, key);
         if (fbs.exists(DATA_PREFIX+key)) {
             throw new KeyAlreadyExistsException(key);
         }
@@ -131,7 +131,7 @@ public class LocalFsBlobStore extends BlobStore {
         validateKey(key);
         checkForBlobOrDownload(key);
         SettableBlobMeta meta = getStoredBlobMeta(key);
-        _aclHandler.hasPermissions(meta.get_acl(), WRITE, who, key);
+        _aclHandler.hasPermissions(meta.getAcl(), WRITE, who, key);
         try {
             return new BlobStoreFileOutputStream(fbs.write(DATA_PREFIX+key, false));
         } catch (IOException e) {
@@ -177,12 +177,12 @@ public class LocalFsBlobStore extends BlobStore {
             checkForBlobUpdate(key);
         }
         SettableBlobMeta meta = getStoredBlobMeta(key);
-        _aclHandler.validateUserCanReadMeta(meta.get_acl(), who, key);
+        _aclHandler.validateUserCanReadMeta(meta.getAcl(), who, key);
         ReadableBlobMeta rbm = new ReadableBlobMeta();
-        rbm.set_settable(meta);
+        rbm.setSettable(meta);
         try {
             LocalFsBlobStoreFile pf = fbs.read(DATA_PREFIX+key);
-            rbm.set_version(pf.getModTime());
+            rbm.setVersion(pf.getModTime());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -194,9 +194,9 @@ public class LocalFsBlobStore extends BlobStore {
         validateKey(key);
         checkForBlobOrDownload(key);
         _aclHandler.normalizeSettableBlobMeta(key, meta, who, ADMIN);
-        BlobStoreAclHandler.validateSettableACLs(key, meta.get_acl());
+        BlobStoreAclHandler.validateSettableACLs(key, meta.getAcl());
         SettableBlobMeta orig = getStoredBlobMeta(key);
-        _aclHandler.hasPermissions(orig.get_acl(), ADMIN, who, key);
+        _aclHandler.hasPermissions(orig.getAcl(), ADMIN, who, key);
         BlobStoreFileOutputStream mOut = null;
         try {
             mOut = new BlobStoreFileOutputStream(fbs.write(META_PREFIX+key, false));
@@ -221,7 +221,7 @@ public class LocalFsBlobStore extends BlobStore {
         validateKey(key);
         checkForBlobOrDownload(key);
         SettableBlobMeta meta = getStoredBlobMeta(key);
-        _aclHandler.hasPermissions(meta.get_acl(), WRITE, who, key);
+        _aclHandler.hasPermissions(meta.getAcl(), WRITE, who, key);
         try {
             fbs.deleteKey(DATA_PREFIX+key);
             fbs.deleteKey(META_PREFIX+key);
@@ -237,7 +237,7 @@ public class LocalFsBlobStore extends BlobStore {
             checkForBlobUpdate(key);
         }
         SettableBlobMeta meta = getStoredBlobMeta(key);
-        _aclHandler.hasPermissions(meta.get_acl(), READ, who, key);
+        _aclHandler.hasPermissions(meta.getAcl(), READ, who, key);
         try {
             return new BlobStoreFileInputStream(fbs.read(DATA_PREFIX+key));
         } catch (IOException e) {
@@ -266,7 +266,7 @@ public class LocalFsBlobStore extends BlobStore {
         int replicationCount = 0;
         validateKey(key);
         SettableBlobMeta meta = getStoredBlobMeta(key);
-        _aclHandler.hasPermissions(meta.get_acl(), READ, who, key);
+        _aclHandler.hasPermissions(meta.getAcl(), READ, who, key);
         if (zkClient.checkExists().forPath(BLOBSTORE_SUBTREE + key) == null) {
             return 0;
         }

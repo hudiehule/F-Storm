@@ -37,9 +37,9 @@
                                                   (merge oldval val)
                                                   val)))])
         opts (RebalanceOptions.)]
-    (if wait (.set_wait_secs opts wait))
-    (if executor (.set_num_executors opts executor))
-    (if num-workers (.set_num_workers opts num-workers))
+    (if wait (.setWait_secs opts wait))
+    (if executor (.setNum_executors opts executor))
+    (if num-workers (.setNum_workers opts num-workers))
     (with-configured-nimbus-connection nimbus
       (.rebalance nimbus name opts)
       (log-message "Topology " name " is rebalancing")

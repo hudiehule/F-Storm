@@ -150,13 +150,13 @@ public class SerializationFactory {
         }
 
         public IdDictionary(StormTopology topology) {
-            List<String> componentNames = new ArrayList<>(topology.get_spouts().keySet());
-            componentNames.addAll(topology.get_bolts().keySet());
-            componentNames.addAll(topology.get_state_spouts().keySet());
+            List<String> componentNames = new ArrayList<>(topology.getSpouts().keySet());
+            componentNames.addAll(topology.getBolts().keySet());
+            componentNames.addAll(topology.getState_spouts().keySet());
 
             for(String name: componentNames) {
                 ComponentCommon common = Utils.getComponentCommon(topology, name);
-                List<String> streams = new ArrayList<>(common.get_streams().keySet());
+                List<String> streams = new ArrayList<>(common.getStreams().keySet());
                 streamNametoId.put(name, idify(streams));
                 streamIdToName.put(name, simpleReverseMap(streamNametoId.get(name)));
             }

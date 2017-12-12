@@ -124,11 +124,11 @@ public class TopologyDetails {
     private void initResourceList() {
         this.resourceList = new HashMap<>();
         // Extract bolt memory info
-        if (this.topology.get_bolts() != null) {
-            for (Map.Entry<String, Bolt> bolt : this.topology.get_bolts().entrySet()) {
+        if (this.topology.getBolts() != null) {
+            for (Map.Entry<String, Bolt> bolt : this.topology.getBolts().entrySet()) {
                 //the json_conf is populated by TopologyBuilder (e.g. boltDeclarer.setMemoryLoad)
                 Map<String, Double> topology_resources = ResourceUtils.parseResources(bolt
-                        .getValue().get_common().get_json_conf());
+                        .getValue().getCommon().getJson_conf());
                 ResourceUtils.checkIntialization(topology_resources, bolt.getValue().toString(), this.topologyConf);
                 for (Map.Entry<ExecutorDetails, String> anExecutorToComponent : this.executorToComponent.entrySet()) {
                     if (bolt.getKey().equals(anExecutorToComponent.getValue())) {
@@ -138,10 +138,10 @@ public class TopologyDetails {
             }
         }
         // Extract spout memory info
-        if (this.topology.get_spouts() != null) {
-            for (Map.Entry<String, SpoutSpec> spout : this.topology.get_spouts().entrySet()) {
+        if (this.topology.getSpouts() != null) {
+            for (Map.Entry<String, SpoutSpec> spout : this.topology.getSpouts().entrySet()) {
                 Map<String, Double> topology_resources = ResourceUtils.parseResources(spout
-                        .getValue().get_common().get_json_conf());
+                        .getValue().getCommon().getJson_conf());
                 ResourceUtils.checkIntialization(topology_resources, spout.getValue().toString(), this.topologyConf);
                 for (Map.Entry<ExecutorDetails, String> anExecutorToComponent : this.executorToComponent.entrySet()) {
                     if (spout.getKey().equals(anExecutorToComponent.getValue())) {
@@ -188,9 +188,9 @@ public class TopologyDetails {
 
         StormTopology storm_topo = this.topology;
         // spouts
-        if (storm_topo.get_spouts() != null) {
+        if (storm_topo.getSpouts() != null) {
             for (Map.Entry<String, SpoutSpec> spoutEntry : storm_topo
-                    .get_spouts().entrySet()) {
+                    .getSpouts().entrySet()) {
                 if (!Utils.isSystemId(spoutEntry.getKey())) {
                     Component newComp;
                     if (all_comp.containsKey(spoutEntry.getKey())) {
@@ -204,27 +204,27 @@ public class TopologyDetails {
                     newComp.type = Component.ComponentType.SPOUT;
 
                     for (Map.Entry<GlobalStreamId, Grouping> spoutInput : spoutEntry
-                            .getValue().get_common().get_inputs()
+                            .getValue().getCommon().getInputs()
                             .entrySet()) {
                         newComp.parents.add(spoutInput.getKey()
-                                .get_componentId());
+                                .getComponentId());
                         if (!all_comp.containsKey(spoutInput
-                                .getKey().get_componentId())) {
+                                .getKey().getComponentId())) {
                             all_comp.put(spoutInput.getKey()
-                                            .get_componentId(),
+                                            .getComponentId(),
                                     new Component(spoutInput.getKey()
-                                            .get_componentId()));
+                                            .getComponentId()));
                         }
                         all_comp.get(spoutInput.getKey()
-                                .get_componentId()).children.add(spoutEntry
+                                .getComponentId()).children.add(spoutEntry
                                 .getKey());
                     }
                 }
             }
         }
         // bolts
-        if (storm_topo.get_bolts() != null) {
-            for (Map.Entry<String, Bolt> boltEntry : storm_topo.get_bolts()
+        if (storm_topo.getBolts() != null) {
+            for (Map.Entry<String, Bolt> boltEntry : storm_topo.getBolts()
                     .entrySet()) {
                 if (!Utils.isSystemId(boltEntry.getKey())) {
                     Component newComp;
@@ -239,19 +239,19 @@ public class TopologyDetails {
                     newComp.type = Component.ComponentType.BOLT;
 
                     for (Map.Entry<GlobalStreamId, Grouping> boltInput : boltEntry
-                            .getValue().get_common().get_inputs()
+                            .getValue().getCommon().getInputs()
                             .entrySet()) {
                         newComp.parents.add(boltInput.getKey()
-                                .get_componentId());
+                                .getComponentId());
                         if (!all_comp.containsKey(boltInput
-                                .getKey().get_componentId())) {
+                                .getKey().getComponentId())) {
                             all_comp.put(boltInput.getKey()
-                                            .get_componentId(),
+                                            .getComponentId(),
                                     new Component(boltInput.getKey()
-                                            .get_componentId()));
+                                            .getComponentId()));
                         }
                         all_comp.get(boltInput.getKey()
-                                .get_componentId()).children.add(boltEntry
+                                .getComponentId()).children.add(boltEntry
                                 .getKey());
                     }
                 }

@@ -63,7 +63,7 @@ public class ShellSpout implements ISpout {
     private AtomicBoolean waitingOnSubprocess = new AtomicBoolean(false);
 
     public ShellSpout(ShellComponent component) {
-        this(component.get_execution_command(), component.get_script());
+        this(component.getExecution_command(), component.getScript());
     }
 
     public ShellSpout(String... command) {

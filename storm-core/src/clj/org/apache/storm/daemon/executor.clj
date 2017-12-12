@@ -100,10 +100,10 @@
             (get target-tasks i)
             ))
       :custom-object
-        (let [grouping (thrift/instantiate-java-object (.get_custom_object thrift-grouping))]
+        (let [grouping (thrift/instantiate-java-object (.getCustom_object thrift-grouping))]
           (mk-custom-grouper grouping context component-id stream-id target-tasks))
       :custom-serialized
-        (let [grouping (Utils/javaDeserialize (.get_custom_serialized thrift-grouping) Serializable)]
+        (let [grouping (Utils/javaDeserialize (.getCustom_serialized thrift-grouping) Serializable)]
           (mk-custom-grouper grouping context component-id stream-id target-tasks))
       :direct
         :direct
@@ -129,7 +129,7 @@
        (HashMap.)))
 
 (defn outbound-components
-  "Returns map of stream id to component id to grouper"
+"Returns map of stream id to component id to grouper"
   [^WorkerTopologyContext worker-context component-id topo-conf]
   (->> (.getTargets worker-context component-id)
         clojurify-structure
@@ -147,10 +147,12 @@
 
 (defn executor-type [^WorkerTopologyContext context component-id]
   (let [topology (.getRawTopology context)
-        spouts (.get_spouts topology)
-        bolts (.get_bolts topology)]
+        spouts (.getSpouts topology)
+        bolts (.getBolts topology)
+        accBolts (.getAccBolts topology)]
     (cond (contains? spouts component-id) :spout
           (contains? bolts component-id) :bolt
+          (contains? accBolts component-id) :accBolt
           :else (throw-runtime "Could not find " component-id " in topology " topology))))
 
 (defn executor-selector [executor-data & _] (:type executor-data))
@@ -180,7 +182,7 @@
                         )
         spec-conf (-> general-context
                       (.getComponentCommon component-id)
-                      .get_json_conf
+                      .getJson_conf
                       from-json)]
     (merge storm-conf (apply dissoc spec-conf to-remove))
     ))

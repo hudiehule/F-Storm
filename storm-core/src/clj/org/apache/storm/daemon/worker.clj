@@ -217,8 +217,8 @@
 
 (defn- stream->fields [^StormTopology topology component]
   (->> (ThriftTopologyUtils/getComponentCommon topology component)
-       .get_streams
-       (map (fn [[s info]] [s (Fields. (.get_output_fields info))]))
+       .getStreams
+       (map (fn [[s info]] [s (Fields. (.getOutput_fields info))]))
        (into {})
        (HashMap.)))
 
@@ -522,7 +522,7 @@
   (when log-config
     (log-debug "Processing received log config: " log-config)
     ;; merge log configs together
-    (let [loggers (.get_named_logger_level log-config)
+    (let [loggers (.getNamed_logger_level log-config)
           logger-context (LogManager/getContext false)]
       (def new-log-configs
         (into {}
@@ -532,11 +532,11 @@
                                 LogManager/ROOT_LOGGER_NAME
                                 msg-logger-name)]
              ;; the new-timeouts map now contains logger => timeout 
-             (when (.is_set_reset_log_level_timeout_epoch logger-level)
-               {logger-name {:action (.get_action logger-level)
-                             :target-log-level (Level/toLevel (.get_target_log_level logger-level))
+             (when (.isSetReset_log_level_timeout_epoch logger-level)
+               {logger-name {:action (.getAction logger-level)
+                             :target-log-level (Level/toLevel (.getTarget_log_level logger-level))
                              :reset-log-level (or (.get @original-log-levels logger-name) (Level/INFO))
-                             :timeout (.get_reset_log_level_timeout_epoch logger-level)}})))))
+                             :timeout (.getReset_log_level_timeout_epoch logger-level)}})))))
 
       ;; look for deleted log timeouts
       (doseq [[logger-name logger-val] (sort @latest-log-config)]
@@ -547,12 +547,12 @@
 
       ;; apply new log settings we just received
       ;; the merged configs are only for the reset logic
-      (doseq [[msg-logger-name logger-level] (sort (into {} (.get_named_logger_level log-config)))]
+      (doseq [[msg-logger-name logger-level] (sort (into {} (.getNamed_logger_level log-config)))]
         (let [logger-name (if (= msg-logger-name "ROOT")
                                 LogManager/ROOT_LOGGER_NAME
                                 msg-logger-name)
-              level (Level/toLevel (.get_target_log_level logger-level))
-              action (.get_action logger-level)]
+              level (Level/toLevel (.getTarget_log_level logger-level))
+              action (.getAction logger-level)]
           (if (= action LogLevelAction/UPDATE)
             (set-logger-level logger-context logger-name level))))
    
@@ -564,7 +564,7 @@
   (let [topology (:topology worker)
         topo-conf (:storm-conf worker)
         worker-topology-context (worker-context worker)
-        hooks (.get_worker_hooks topology)]
+        hooks (.getWorker_hooks topology)]
     (dofor [hook hooks]
       (let [hook-bytes (Utils/toByteArray hook)
             deser-hook (Utils/javaDeserialize hook-bytes BaseWorkerHook)]
@@ -572,7 +572,7 @@
 
 (defn run-worker-shutdown-hooks [worker]
   (let [topology (:topology worker)
-        hooks (.get_worker_hooks topology)]
+        hooks (.getWorker_hooks topology)]
     (dofor [hook hooks]
       (let [hook-bytes (Utils/toByteArray hook)
             deser-hook (Utils/javaDeserialize hook-bytes BaseWorkerHook)]

@@ -794,8 +794,8 @@ public class TridentTopology {
     
     private static boolean isIdentityPartition(PartitionNode n) {
         Grouping g = n.thriftGrouping;
-        if(g.is_set_custom_serialized()) {
-            CustomStreamGrouping csg = (CustomStreamGrouping) Utils.javaDeserialize(g.get_custom_serialized(), Serializable.class);
+        if(g.isSetCustom_serialized()) {
+            CustomStreamGrouping csg = (CustomStreamGrouping) Utils.javaDeserialize(g.getCustom_serialized(), Serializable.class);
             return csg instanceof IdentityGrouping;
         }
         return false;

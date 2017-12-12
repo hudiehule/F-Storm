@@ -194,7 +194,7 @@ public class WindowedBoltExecutor implements IRichBolt {
     private Set<GlobalStreamId> getComponentStreams(TopologyContext context) {
         Set<GlobalStreamId> streams = new HashSet<>();
         for (GlobalStreamId streamId : context.getThisSources().keySet()) {
-            if (!streamId.get_streamId().equals(CheckpointSpout.CHECKPOINT_STREAM_ID)) {
+            if (!streamId.getStreamId().equals(CheckpointSpout.CHECKPOINT_STREAM_ID)) {
                 streams.add(streamId);
             }
         }

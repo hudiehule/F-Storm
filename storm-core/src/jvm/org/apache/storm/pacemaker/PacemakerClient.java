@@ -165,7 +165,7 @@ public class PacemakerClient implements ISaslClient {
 
             int next = availableMessageSlots.take();
             synchronized (m) {
-                m.set_message_id(next);
+                m.setMessage_id(next);
                 messages[next] = m;
                 LOG.debug("Put message in slot: {}", Integer.toString(next));
                 do {
@@ -215,7 +215,7 @@ public class PacemakerClient implements ISaslClient {
     }
 
     public void gotMessage(HBMessage m) {
-        int message_id = m.get_message_id();
+        int message_id = m.getMessage_id();
         if(message_id >=0 && message_id < maxPending) {
 
             LOG.debug("Pacemaker client got message: {}", m.toString());

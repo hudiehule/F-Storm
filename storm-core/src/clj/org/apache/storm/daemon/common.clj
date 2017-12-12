@@ -133,7 +133,7 @@
               (throw (InvalidTopologyException.
                        (str id " is not a valid component id")))))
           (doseq [obj (vals obj-map)
-                  id (-> obj .get_common .get_streams keys)]
+                  id (-> obj .getCommon .getStreams keys)]
             (if (Utils/isSystemId id)
               (throw (InvalidTopologyException.
                        (str id " is not a valid stream id"))))))))))
@@ -146,19 +146,19 @@
 
 (defn component-conf [component]
   (->> component
-      .get_common
-      .get_json_conf
+      .getCommon
+      .getJson_conf
       from-json))
 
 (defn validate-basic! [^StormTopology topology]
   (validate-ids! topology)
   (doseq [f thrift/SPOUT-FIELDS
           obj (->> f (.getFieldValue topology) vals)]
-    (if-not (empty? (-> obj .get_common .get_inputs))
+    (if-not (empty? (-> obj .getCommon .getInputs))
       (throw (InvalidTopologyException. "May not declare inputs for a spout"))))
   (doseq [[comp-id comp] (all-components topology)
           :let [conf (component-conf comp)
-                p (-> comp .get_common thrift/parallelism-hint)]]
+                p (-> comp .getCommon thrift/parallelism-hint)]]
     (when (and (> (conf TOPOLOGY-TASKS) 0)
                p
                (<= p 0))
@@ -170,25 +170,25 @@
   ;; and if it is a fields grouping, validate the corresponding field exists  
   (let [all-components (all-components topology)]
     (doseq [[id comp] all-components
-            :let [inputs (.. comp get_common get_inputs)]]
+            :let [inputs (.. comp getCommon getInputs)]]
       (doseq [[global-stream-id grouping] inputs
-              :let [source-component-id (.get_componentId global-stream-id)
-                    source-stream-id    (.get_streamId global-stream-id)]]
+              :let [source-component-id (.getComponentId global-stream-id)
+                    source-stream-id    (.getStreamId global-stream-id)]]
         (if-not (contains? all-components source-component-id)
           (throw (InvalidTopologyException. (str "Component: [" id "] subscribes from non-existent component [" source-component-id "]")))
-          (let [source-streams (-> all-components (get source-component-id) .get_common .get_streams)]
+          (let [source-streams (-> all-components (get source-component-id) .getCommon .getStreams)]
             (if-not (contains? source-streams source-stream-id)
               (throw (InvalidTopologyException. (str "Component: [" id "] subscribes from non-existent stream: [" source-stream-id "] of component [" source-component-id "]")))
               (if (= :fields (thrift/grouping-type grouping))
-                (let [grouping-fields (set (.get_fields grouping))
-                      source-stream-fields (-> source-streams (get source-stream-id) .get_output_fields set)
+                (let [grouping-fields (set (.getFields grouping))
+                      source-stream-fields (-> source-streams (get source-stream-id) .getOutput_fields set)
                       diff-fields (set/difference grouping-fields source-stream-fields)]
                   (when-not (empty? diff-fields)
                     (throw (InvalidTopologyException. (str "Component: [" id "] subscribes from stream: [" source-stream-id "] of component [" source-component-id "] with non-existent fields: " diff-fields)))))))))))))
 
 (defn acker-inputs [^StormTopology topology]
-  (let [bolt-ids (.. topology get_bolts keySet)
-        spout-ids (.. topology get_spouts keySet)
+  (let [bolt-ids (.. topology getBolts keySet)
+        spout-ids (.. topology getSpouts keySet)
         spout-inputs (apply merge
                             (for [id spout-ids]
                               {[id ACKER-INIT-STREAM-ID] ["id"]}
@@ -205,8 +205,8 @@
 ;; with a field grouping on component id so that all tuples from a component
 ;; goes to same executor and can be viewed via logviewer.
 (defn eventlogger-inputs [^StormTopology topology]
-  (let [bolt-ids (.. topology get_bolts keySet)
-        spout-ids (.. topology get_spouts keySet)
+  (let [bolt-ids (.. topology getBolts keySet)
+        spout-ids (.. topology getSpouts keySet)
         spout-inputs (apply merge
                        (for [id spout-ids]
                          {[id EVENTLOGGER-STREAM-ID] ["component-id"]}
@@ -228,45 +228,45 @@
                                          :p num-executors
                                          :conf {TOPOLOGY-TASKS num-executors
                                                 TOPOLOGY-TICK-TUPLE-FREQ-SECS (storm-conf TOPOLOGY-MESSAGE-TIMEOUT-SECS)})]
-    (dofor [[_ bolt] (.get_bolts ret)
-            :let [common (.get_common bolt)]]
+    (dofor [[_ bolt] (.getBolts ret)
+            :let [common (.getCommon bolt)]]
            (do
-             (.put_to_streams common ACKER-ACK-STREAM-ID (thrift/output-fields ["id" "ack-val"]))
-             (.put_to_streams common ACKER-FAIL-STREAM-ID (thrift/output-fields ["id"]))
-             (.put_to_streams common ACKER-RESET-TIMEOUT-STREAM-ID (thrift/output-fields ["id"]))
+             (.putToStreams common ACKER-ACK-STREAM-ID (thrift/output-fields ["id" "ack-val"]))
+             (.putToStreams common ACKER-FAIL-STREAM-ID (thrift/output-fields ["id"]))
+             (.putToStreams common ACKER-RESET-TIMEOUT-STREAM-ID (thrift/output-fields ["id"]))
              ))
-    (dofor [[_ spout] (.get_spouts ret)
-            :let [common (.get_common spout)
+    (dofor [[_ spout] (.getSpouts ret)
+            :let [common (.getCommon spout)
                   spout-conf (merge
                                (component-conf spout)
                                {TOPOLOGY-TICK-TUPLE-FREQ-SECS (storm-conf TOPOLOGY-MESSAGE-TIMEOUT-SECS)})]]
       (do
         ;; this set up tick tuples to cause timeouts to be triggered
-        (.set_json_conf common (to-json spout-conf))
-        (.put_to_streams common ACKER-INIT-STREAM-ID (thrift/output-fields ["id" "init-val" "spout-task"]))
-        (.put_to_inputs common
+        (.setJson_conf common (to-json spout-conf))
+        (.putToStreams common ACKER-INIT-STREAM-ID (thrift/output-fields ["id" "init-val" "spout-task"]))
+        (.putToInputs common
                         (GlobalStreamId. ACKER-COMPONENT-ID ACKER-ACK-STREAM-ID)
                         (thrift/mk-direct-grouping))
-        (.put_to_inputs common
+        (.putToInputs common
                         (GlobalStreamId. ACKER-COMPONENT-ID ACKER-FAIL-STREAM-ID)
                         (thrift/mk-direct-grouping))
-        (.put_to_inputs common
+        (.putToInputs common
                         (GlobalStreamId. ACKER-COMPONENT-ID ACKER-RESET-TIMEOUT-STREAM-ID)
                         (thrift/mk-direct-grouping))
         ))
-    (.put_to_bolts ret "__acker" acker-bolt)
+    (.putToBolts ret "__acker" acker-bolt)
     ))
 
 (defn add-metric-streams! [^StormTopology topology]
   (doseq [[_ component] (all-components topology)
-          :let [common (.get_common component)]]
-    (.put_to_streams common METRICS-STREAM-ID
+          :let [common (.getCommon component)]]
+    (.putToStreams common METRICS-STREAM-ID
                      (thrift/output-fields ["task-info" "data-points"]))))
 
 (defn add-system-streams! [^StormTopology topology]
   (doseq [[_ component] (all-components topology)
-          :let [common (.get_common component)]]
-    (.put_to_streams common SYSTEM-STREAM-ID (thrift/output-fields ["event"]))))
+          :let [common (.getCommon component)]]
+    (.putToStreams common SYSTEM-STREAM-ID (thrift/output-fields ["event"]))))
 
 
 (defn map-occurrences [afn coll]
@@ -328,14 +328,14 @@
                             TOPOLOGY-TICK-TUPLE-FREQ-SECS (storm-conf TOPOLOGY-MESSAGE-TIMEOUT-SECS)})]
 
     (doseq [[_ component] (all-components ret)
-            :let [common (.get_common component)]]
-      (.put_to_streams common EVENTLOGGER-STREAM-ID (thrift/output-fields (eventlogger-bolt-fields))))
-    (.put_to_bolts ret EVENTLOGGER-COMPONENT-ID eventlogger-bolt)
+            :let [common (.getCommon component)]]
+      (.putToStreams common EVENTLOGGER-STREAM-ID (thrift/output-fields (eventlogger-bolt-fields))))
+    (.putToBolts ret EVENTLOGGER-COMPONENT-ID eventlogger-bolt)
     ))
 
 (defn add-metric-components! [storm-conf ^StormTopology topology]  
   (doseq [[comp-id bolt-spec] (metrics-consumer-bolt-specs storm-conf topology)]
-    (.put_to_bolts topology comp-id bolt-spec)))
+    (.putToBolts topology comp-id bolt-spec)))
 
 (defn add-system-components! [conf ^StormTopology topology]
   (let [system-bolt-spec (thrift/mk-bolt-spec*
@@ -346,7 +346,7 @@
                            CREDENTIALS-CHANGED-STREAM-ID (thrift/output-fields ["creds"])}
                           :p 0
                           :conf {TOPOLOGY-TASKS 0})]
-    (.put_to_bolts topology SYSTEM-COMPONENT-ID system-bolt-spec)))
+    (.putToBolts topology SYSTEM-COMPONENT-ID system-bolt-spec)))
 
 (defn system-topology! [storm-conf ^StormTopology topology]
   (validate-basic! topology)
@@ -368,7 +368,7 @@
   (or (nil? (storm-conf TOPOLOGY-EVENTLOGGER-EXECUTORS)) (> (storm-conf TOPOLOGY-EVENTLOGGER-EXECUTORS) 0)))
 
 (defn num-start-executors [component]
-  (thrift/parallelism-hint (.get_common component)))
+  (thrift/parallelism-hint (.getCommon component)))
 
 (defn storm-task-info
   "Returns map from task -> component id"

@@ -428,7 +428,7 @@ public class BatchSubtopologyBuilder {
 
                 @Override
                 public String getComponent() {
-                    return stream.get_componentId();
+                    return stream.getComponentId();
                 }                
             });
             return this;

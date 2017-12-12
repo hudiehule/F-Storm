@@ -28,7 +28,11 @@ public enum AccType implements org.apache.thrift.TEnum {
   public int getValue() {
     return value;
   }
-
+/*
+  public void setValue(int val) {
+       this.value = val;
+  }
+*/
   /**
    * Find a the enum type by its integer value, as defined in the Thrift IDL.
    * @return null if the value is not found.

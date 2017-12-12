@@ -236,17 +236,17 @@ public class Slot extends Thread implements AutoCloseable {
             return true;
         }
         if (a != null && b != null) {
-            if (a.get_topology_id().equals(b.get_topology_id())) {
-                Set<ExecutorInfo> aexec = new HashSet<>(a.get_executors());
-                Set<ExecutorInfo> bexec = new HashSet<>(b.get_executors());
+            if (a.getTopology_id().equals(b.getTopology_id())) {
+                Set<ExecutorInfo> aexec = new HashSet<>(a.getExecutors());
+                Set<ExecutorInfo> bexec = new HashSet<>(b.getExecutors());
                 if (aexec.equals(bexec)) {
-                    boolean aHasResources = a.is_set_resources();
-                    boolean bHasResources = b.is_set_resources();
+                    boolean aHasResources = a.isSetResources();
+                    boolean bHasResources = b.isSetResources();
                     if (!aHasResources && !bHasResources) {
                         return true;
                     }
                     if (aHasResources && bHasResources) {
-                        if (a.get_resources().equals(b.get_resources())) {
+                        if (a.getResources().equals(b.getResources())) {
                             return true;
                         }
                     }
@@ -488,7 +488,7 @@ public class Slot extends Thread implements AutoCloseable {
         
         LSWorkerHeartbeat hb = dynamicState.container.readHeartbeat();
         if (hb != null) {
-            long hbAgeMs = (Time.currentTimeSecs() - hb.get_time_secs()) * 1000;
+            long hbAgeMs = (Time.currentTimeSecs() - hb.getTime_secs()) * 1000;
             if (hbAgeMs <= staticState.hbTimeoutMs) {
                 return dynamicState.withState(MachineState.RUNNING);
             }
@@ -539,7 +539,7 @@ public class Slot extends Thread implements AutoCloseable {
             return killAndRelaunchContainer(dynamicState, staticState);
         }
         
-        long timeDiffMs = (Time.currentTimeSecs() - hb.get_time_secs()) * 1000;
+        long timeDiffMs = (Time.currentTimeSecs() - hb.getTime_secs()) * 1000;
         if (timeDiffMs > staticState.hbTimeoutMs) {
             LOG.warn("SLOT {}: HB is too old {} > {}", staticState.port, timeDiffMs, staticState.hbTimeoutMs);
             return killAndRelaunchContainer(dynamicState, staticState);
@@ -552,13 +552,13 @@ public class Slot extends Thread implements AutoCloseable {
             Iterator<TopoProfileAction> iter = mod.iterator();
             while (iter.hasNext()) {
                 TopoProfileAction action = iter.next();
-                if (!action.topoId.equals(dynamicState.currentAssignment.get_topology_id())) {
+                if (!action.topoId.equals(dynamicState.currentAssignment.getTopology_id())) {
                     iter.remove();
                     LOG.warn("Dropping {} wrong topology is running", action);
                     //Not for this topology so skip it
                 } else {
                     if (modPending.contains(action)) {
-                        boolean isTimeForStop = Time.currentTimeMillis() > action.request.get_time_stamp();
+                        boolean isTimeForStop = Time.currentTimeMillis() > action.request.getTime_stamp();
                         if (isTimeForStop) {
                             if (dynamicState.container.runProfiling(action.request, true)) {
                                 LOG.debug("Stopped {} action finished", action);
@@ -573,7 +573,7 @@ public class Slot extends Thread implements AutoCloseable {
                     } else {
                         //J_PROFILE_START is not used.  When you see a J_PROFILE_STOP
                         // start profiling and save it away to stop when timeout happens
-                        if (action.request.get_action() == ProfileAction.JPROFILE_STOP) {
+                        if (action.request.getAction() == ProfileAction.JPROFILE_STOP) {
                             if (dynamicState.container.runProfiling(action.request, false)) {
                                 modPending.add(action);
                                 LOG.debug("Started {} now: {}", action, Time.currentTimeMillis());

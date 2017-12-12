@@ -92,7 +92,7 @@ public class GeneralTopologyContext implements JSONAware {
      * Gets the set of streams declared for the specified component.
      */
     public Set<String> getComponentStreams(String componentId) {
-        return getComponentCommon(componentId).get_streams().keySet();
+        return getComponentCommon(componentId).getStreams().keySet();
     }
 
     /**
@@ -120,7 +120,7 @@ public class GeneralTopologyContext implements JSONAware {
      * Gets the declared output fields for the specified global stream id.
      */
     public Fields getComponentOutputFields(GlobalStreamId id) {
-        return getComponentOutputFields(id.get_componentId(), id.get_streamId());
+        return getComponentOutputFields(id.getComponentId(), id.getStreamId());
     }    
     
     /**
@@ -129,7 +129,7 @@ public class GeneralTopologyContext implements JSONAware {
      * @return A map from subscribed component/stream to the grouping subscribed with.
      */
     public Map<GlobalStreamId, Grouping> getSources(String componentId) {
-        return getComponentCommon(componentId).get_inputs();
+        return getComponentCommon(componentId).getInputs();
     }
 
     /**
@@ -141,14 +141,14 @@ public class GeneralTopologyContext implements JSONAware {
     public Map<String, Map<String, Grouping>> getTargets(String componentId) {
         Map<String, Map<String, Grouping>> ret = new HashMap<>();
         for(String otherComponentId: getComponentIds()) {
-            Map<GlobalStreamId, Grouping> inputs = getComponentCommon(otherComponentId).get_inputs();
+            Map<GlobalStreamId, Grouping> inputs = getComponentCommon(otherComponentId).getInputs();
             for(Map.Entry<GlobalStreamId, Grouping> entry: inputs.entrySet()) {
                 GlobalStreamId id = entry.getKey();
-                if(id.get_componentId().equals(componentId)) {
-                    Map<String, Grouping> curr = ret.get(id.get_streamId());
+                if(id.getComponentId().equals(componentId)) {
+                    Map<String, Grouping> curr = ret.get(id.getStreamId());
                     if(curr==null) curr = new HashMap<>();
                     curr.put(otherComponentId, entry.getValue());
-                    ret.put(id.get_streamId(), curr);
+                    ret.put(id.getStreamId(), curr);
                 }
             }
         }
@@ -184,9 +184,9 @@ public class GeneralTopologyContext implements JSONAware {
     
     public int maxTopologyMessageTimeout() {
         Integer max = Utils.getInt(_stormConf.get(Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS));
-        for(String spout: getRawTopology().get_spouts().keySet()) {
+        for(String spout: getRawTopology().getSpouts().keySet()) {
             ComponentCommon common = getComponentCommon(spout);
-            String jsonConf = common.get_json_conf();
+            String jsonConf = common.getJson_conf();
             if(jsonConf!=null) {
                 try {
                     Map conf = (Map) JSONValue.parseWithException(jsonConf);

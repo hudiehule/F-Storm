@@ -108,7 +108,7 @@
 
 (defn executor-summary-type
   [topology ^ExecutorSummary s]
-  (component-type topology (.get_component_id s)))
+  (component-type topology (.getComponent_id s)))
 
 (defn spout-summary?
   [topology s]
@@ -120,7 +120,7 @@
 
 (defn group-by-comp
   [summs]
-  (let [ret (group-by #(.get_component_id ^ExecutorSummary %) summs)]
+  (let [ret (group-by #(.getComponent_id ^ExecutorSummary %) summs)]
     (into (sorted-map) ret )))
 
 (defn logviewer-link [host fname secure?]
@@ -153,25 +153,25 @@
 (defn get-error-data
   [error]
   (if error
-    (error-subset (.get_error ^ErrorInfo error))
+    (error-subset (.getError ^ErrorInfo error))
     ""))
 
 (defn get-error-port
   [error]
   (if error
-    (.get_port ^ErrorInfo error)
+    (.getPort ^ErrorInfo error)
     ""))
 
 (defn get-error-host
   [error]
   (if error
-    (.get_host ^ErrorInfo error)
+    (.getHost ^ErrorInfo error)
     ""))
 
 (defn get-error-time
   [error]
   (if error
-    (.get_error_time_secs ^ErrorInfo error)))
+    (.getError_time_secs ^ErrorInfo error)))
 
 (defn worker-dump-link [host port topology-id]
   (url-format "http://%s:%s/dumps/%s/%s"
@@ -215,7 +215,7 @@
   [spout-bolt spout-comp-summs bolt-comp-summs window storm-id]
   (let [components (for [[id spec] spout-bolt]
             [id
-             (let [inputs (.get_inputs (.get_common spec))
+             (let [inputs (.getInputs (.getCommon spec))
                    bolt-summs (get bolt-comp-summs id)
                    spout-summs (get spout-comp-summs id)
                    bolt-cap (if bolt-summs
@@ -239,20 +239,20 @@
                                  [:transferred window]))
                 :stats (let [mapfn (fn [dat]
                                      (map (fn [^ExecutorSummary summ]
-                                            {:host (.get_host summ)
-                                             :port (.get_port summ)
-                                             :uptime_secs (.get_uptime_secs summ)
-                                             :transferred (if-let [stats (.get_stats summ)]
-                                                            (sanitize-transferred (.get_transferred stats)))})
+                                            {:host (.getHost summ)
+                                             :port (.getPort summ)
+                                             :uptime_secs (.getUptime_secs summ)
+                                             :transferred (if-let [stats (.getStats summ)]
+                                                            (sanitize-transferred (.getTransferred stats)))})
                                           dat))]
                          (if bolt-summs
                            (mapfn bolt-summs)
                            (mapfn spout-summs)))
                 :link (url-format "/component.html?id=%s&topology_id=%s" id storm-id)
                 :inputs (for [[global-stream-id group] inputs]
-                          {:component (.get_componentId global-stream-id)
-                           :stream (.get_streamId global-stream-id)
-                           :sani-stream (sanitize-stream-name (.get_streamId global-stream-id))
+                          {:component (.getComponentId global-stream-id)
+                           :stream (.getStreamId global-stream-id)
+                           :sani-stream (sanitize-stream-name (.getStreamId global-stream-id))
                            :grouping (clojure.core/name (thrift/grouping-type group))})})])]
     (into {} (doall components))))
 
@@ -283,13 +283,13 @@
     nimbus
     (let [window (if window window ":all-time")
           topology (.getTopology ^Nimbus$Client nimbus id)
-          spouts (.get_spouts topology)
-          bolts (.get_bolts topology)
+          spouts (.getSpouts topology)
+          bolts (.getBolts topology)
           summ (->> (doto
                       (GetInfoOptions.)
-                      (.set_num_err_choice NumErrorsChoice/NONE))
+                      (.setNum_err_choice NumErrorsChoice/NONE))
                     (.getTopologyInfoWithOpts ^Nimbus$Client nimbus id))
-          execs (.get_executors summ)
+          execs (.getExecutors summ)
           spout-summs (filter (partial spout-summary? topology) execs)
           bolt-summs (filter (partial bolt-summary? topology) execs)
           spout-comp-summs (group-by-comp spout-summs)
@@ -344,23 +344,23 @@
       (topology-history-info (.getTopologyHistory ^Nimbus$Client nimbus user) user)))
   ([history user]
     {"topo-history"
-     (into [] (.get_topo_ids history))}))
+     (into [] (.getTopo_ids history))}))
 
 (defn cluster-summary
   ([user]
      (thrift/with-configured-nimbus-connection nimbus
         (cluster-summary (.getClusterInfo ^Nimbus$Client nimbus) user)))
   ([^ClusterSummary summ user]
-     (let [sups (.get_supervisors summ)
-           used-slots (reduce + (map #(.get_num_used_workers ^SupervisorSummary %) sups))
-           total-slots (reduce + (map #(.get_num_workers ^SupervisorSummary %) sups))
+     (let [sups (.getSupervisors summ)
+           used-slots (reduce + (map #(.getNum_used_workers ^SupervisorSummary %) sups))
+           total-slots (reduce + (map #(.getNum_workers ^SupervisorSummary %) sups))
            free-slots (- total-slots used-slots)
-           topologies (.get_topologies_size summ)
-           total-tasks (->> (.get_topologies summ)
-                            (map #(.get_num_tasks ^TopologySummary %))
+           topologies (.getTopologies_size summ)
+           total-tasks (->> (.getTopologies summ)
+                            (map #(.getNum_tasks ^TopologySummary %))
                             (reduce +))
-           total-executors (->> (.get_topologies summ)
-                                (map #(.get_num_executors ^TopologySummary %))
+           total-executors (->> (.getTopologies summ)
+                                (map #(.getNum_executors ^TopologySummary %))
                                 (reduce +))]
        {"user" user
         "stormVersion" STORM-VERSION
@@ -388,22 +388,22 @@
   ([]
     (thrift/with-configured-nimbus-connection nimbus
       (nimbus-summary
-        (.get_nimbuses (.getClusterInfo ^Nimbus$Client nimbus)))))
+        (.getNimbuses (.getClusterInfo ^Nimbus$Client nimbus)))))
   ([nimbuses]
     (let [nimbus-seeds (set (map #(str %1 ":" (*STORM-CONF* NIMBUS-THRIFT-PORT)) (set (*STORM-CONF* NIMBUS-SEEDS))))
-          alive-nimbuses (set (map #(str (.get_host %1) ":" (.get_port %1)) nimbuses))
+          alive-nimbuses (set (map #(str (.getHost %1) ":" (.getPort %1)) nimbuses))
           offline-nimbuses (clojure.set/difference nimbus-seeds alive-nimbuses)
           offline-nimbuses-summary (map #(convert-to-nimbus-summary %1) offline-nimbuses)]
       {"nimbuses"
        (concat offline-nimbuses-summary
        (for [^NimbusSummary n nimbuses
-             :let [uptime (.get_uptime_secs n)]]
+             :let [uptime (.getUptime_secs n)]]
          {
-          "host" (.get_host n)
-          "port" (.get_port n)
-          "nimbusLogLink" (nimbus-log-link (.get_host n))
-          "status" (if (.is_isLeader n) "Leader" "Not a Leader")
-          "version" (.get_version n)
+          "host" (.getHost n)
+          "port" (.getPort n)
+          "nimbusLogLink" (nimbus-log-link (.getHost n))
+          "status" (if (.isIsLeader n) "Leader" "Not a Leader")
+          "version" (.getVersion n)
           "nimbusUpTime" (pretty-uptime-sec uptime)
           "nimbusUpTimeSeconds" uptime}))})))
 
@@ -411,22 +411,22 @@
   ([]
    (thrift/with-configured-nimbus-connection nimbus
                 (supervisor-summary
-                  (.get_supervisors (.getClusterInfo ^Nimbus$Client nimbus)))))
+                  (.getSupervisors (.getClusterInfo ^Nimbus$Client nimbus)))))
   ([summs]
    {"supervisors"
     (for [^SupervisorSummary s summs]
-      {"id" (.get_supervisor_id s)
-       "host" (.get_host s)
-       "uptime" (pretty-uptime-sec (.get_uptime_secs s))
-       "uptimeSeconds" (.get_uptime_secs s)
-       "slotsTotal" (.get_num_workers s)
-       "slotsUsed" (.get_num_used_workers s)
-       "totalMem" (get (.get_total_resources s) Config/SUPERVISOR_MEMORY_CAPACITY_MB)
-       "totalCpu" (get (.get_total_resources s) Config/SUPERVISOR_CPU_CAPACITY)
-       "usedMem" (.get_used_mem s)
-       "usedCpu" (.get_used_cpu s)
-       "logLink" (supervisor-log-link (.get_host s))
-       "version" (.get_version s)})
+      {"id" (.getSupervisor_id s)
+       "host" (.getHost s)
+       "uptime" (pretty-uptime-sec (.getUptime_secs s))
+       "uptimeSeconds" (.getUptime_secs s)
+       "slotsTotal" (.getNum_workers s)
+       "slotsUsed" (.getNum_used_workers s)
+       "totalMem" (get (.getTotal_resources s) Config/SUPERVISOR_MEMORY_CAPACITY_MB)
+       "totalCpu" (get (.getTotal_resources s) Config/SUPERVISOR_CPU_CAPACITY)
+       "usedMem" (.getUsed_mem s)
+       "usedCpu" (.getUsed_cpu s)
+       "logLink" (supervisor-log-link (.getHost s))
+       "version" (.getVersion s)})
     "schedulerDisplayResource" (*STORM-CONF* Config/SCHEDULER_DISPLAY_RESOURCE)}))
 
 (defn all-topologies-summary
@@ -434,31 +434,31 @@
    (thrift/with-configured-nimbus-connection
      nimbus
      (all-topologies-summary
-       (.get_topologies (.getClusterInfo ^Nimbus$Client nimbus)))))
+       (.getTopologies (.getClusterInfo ^Nimbus$Client nimbus)))))
   ([summs]
    {"topologies"
     (for [^TopologySummary t summs]
       {
-       "id" (.get_id t)
-       "encodedId" (url-encode (.get_id t))
-       "owner" (.get_owner t)
-       "name" (.get_name t)
-       "status" (.get_status t)
-       "uptime" (pretty-uptime-sec (.get_uptime_secs t))
-       "uptimeSeconds" (.get_uptime_secs t)
-       "tasksTotal" (.get_num_tasks t)
-       "workersTotal" (.get_num_workers t)
-       "executorsTotal" (.get_num_executors t)
-       "replicationCount" (.get_replication_count t)
-       "schedulerInfo" (.get_sched_status t)
-       "requestedMemOnHeap" (.get_requested_memonheap t)
-       "requestedMemOffHeap" (.get_requested_memoffheap t)
-       "requestedTotalMem" (+ (.get_requested_memonheap t) (.get_requested_memoffheap t))
-       "requestedCpu" (.get_requested_cpu t)
-       "assignedMemOnHeap" (.get_assigned_memonheap t)
-       "assignedMemOffHeap" (.get_assigned_memoffheap t)
-       "assignedTotalMem" (+ (.get_assigned_memonheap t) (.get_assigned_memoffheap t))
-       "assignedCpu" (.get_assigned_cpu t)})
+       "id" (.getId t)
+       "encodedId" (url-encode (.getId t))
+       "owner" (.getOwner t)
+       "name" (.getName t)
+       "status" (.getStatus t)
+       "uptime" (pretty-uptime-sec (.getUptime_secs t))
+       "uptimeSeconds" (.getUptime_secs t)
+       "tasksTotal" (.getNum_tasks t)
+       "workersTotal" (.getNum_workers t)
+       "executorsTotal" (.getNum_executors t)
+       "replicationCount" (.getReplication_count t)
+       "schedulerInfo" (.getSched_status t)
+       "requestedMemOnHeap" (.getRequested_memonheap t)
+       "requestedMemOffHeap" (.getRequested_memoffheap t)
+       "requestedTotalMem" (+ (.getRequested_memonheap t) (.getRequested_memoffheap t))
+       "requestedCpu" (.getRequested_cpu t)
+       "assignedMemOnHeap" (.getAssigned_memonheap t)
+       "assignedMemOffHeap" (.getAssigned_memoffheap t)
+       "assignedTotalMem" (+ (.getAssigned_memonheap t) (.getAssigned_memoffheap t))
+       "assignedCpu" (.getAssigned_cpu t)})
     "schedulerDisplayResource" (*STORM-CONF* Config/SCHEDULER_DISPLAY_RESOURCE)}))
 
 (defn topology-stats [window stats]
@@ -480,17 +480,17 @@
     (let [window (if window window ":all-time")
           topology-info (->> (doto
                                (GetInfoOptions.)
-                               (.set_num_err_choice NumErrorsChoice/ONE))
+                               (.setNum_err_choice NumErrorsChoice/ONE))
                              (.getTopologyInfoWithOpts ^Nimbus$Client nimbus
                                                        id))
           storm-topology (.getTopology ^Nimbus$Client nimbus id)
-          spout-executor-summaries (filter (partial spout-summary? storm-topology) (.get_executors topology-info))
-          bolt-executor-summaries (filter (partial bolt-summary? storm-topology) (.get_executors topology-info))
+          spout-executor-summaries (filter (partial spout-summary? storm-topology) (.getExecutors topology-info))
+          bolt-executor-summaries (filter (partial bolt-summary? storm-topology) (.getExecutors topology-info))
           spout-comp-id->executor-summaries (group-by-comp spout-executor-summaries)
           bolt-comp-id->executor-summaries (group-by-comp bolt-executor-summaries)
           bolt-comp-id->executor-summaries (filter-key (mk-include-sys-fn include-sys?) bolt-comp-id->executor-summaries)
-          id->spout-spec (.get_spouts storm-topology)
-          id->bolt (.get_bolts storm-topology)
+          id->spout-spec (.getSpouts storm-topology)
+          id->bolt (.getBolts storm-topology)
           visualizer-data (visualization-data (merge (hashmap-to-persistent id->spout-spec)
                                                      (hashmap-to-persistent id->bolt))
                                               spout-comp-id->executor-summaries
@@ -513,98 +513,98 @@
 (defn- common-agg-stats-json
   "Returns a JSON representation of a common aggregated statistics."
   [^CommonAggregateStats common-stats]
-  {"executors" (.get_num_executors common-stats)
-   "tasks" (.get_num_tasks common-stats)
-   "emitted" (.get_emitted common-stats)
-   "transferred" (.get_transferred common-stats)
-   "acked" (.get_acked common-stats)
-   "failed" (.get_failed common-stats)})
+  {"executors" (.getNum_executors common-stats)
+   "tasks" (.getNum_tasks common-stats)
+   "emitted" (.getEmitted common-stats)
+   "transferred" (.getTransferred common-stats)
+   "acked" (.getAcked common-stats)
+   "failed" (.getFailed common-stats)})
 
 (defmulti comp-agg-stats-json
   "Returns a JSON representation of aggregated statistics."
-  (fn [_ _ [id ^ComponentAggregateStats s]] (.get_type s)))
+  (fn [_ _ [id ^ComponentAggregateStats s]] (.getType s)))
 
 (defmethod comp-agg-stats-json ComponentType/SPOUT
   [topo-id secure? [id ^ComponentAggregateStats s]]
-  (let [^SpoutAggregateStats ss (.. s get_specific_stats get_spout)
-        cs (.get_common_stats s)]
+  (let [^SpoutAggregateStats ss (.. s getSpecific_stats getSpout)
+        cs (.getCommon_stats s)]
     (merge
       (common-agg-stats-json cs)
-      (get-error-json topo-id (.get_last_error s) secure?)
+      (get-error-json topo-id (.getLast_error s) secure?)
       {"spoutId" id
        "encodedSpoutId" (url-encode id)
-       "completeLatency" (float-str (.get_complete_latency_ms ss))})))
+       "completeLatency" (float-str (.getComplete_latency_ms ss))})))
 
 (defmethod comp-agg-stats-json ComponentType/BOLT
   [topo-id secure? [id ^ComponentAggregateStats s]]
   (let [^BoltAggregateStats ss (.. s get_specific_stats get_bolt)
-        cs (.get_common_stats s)]
+        cs (.getCommon_stats s)]
     (merge
       (common-agg-stats-json cs)
-      (get-error-json topo-id (.get_last_error s) secure?)
+      (get-error-json topo-id (.getLast_error s) secure?)
       {"boltId" id
        "encodedBoltId" (url-encode id)
-       "capacity" (float-str (.get_capacity ss))
-       "executeLatency" (float-str (.get_execute_latency_ms ss))
-       "executed" (.get_executed ss)
-       "processLatency" (float-str (.get_process_latency_ms ss))})))
+       "capacity" (float-str (.getCapacity ss))
+       "executeLatency" (float-str (.getExecute_latency_ms ss))
+       "executed" (.getExecuted ss)
+       "processLatency" (float-str (.getProcess_latency_ms ss))})))
 
 (defn- unpack-topology-page-info
   "Unpacks the serialized object to data structures"
   [^TopologyPageInfo topo-info window secure?]
-  (let [id (.get_id topo-info)
-        ^TopologyStats topo-stats (.get_topology_stats topo-info)
+  (let [id (.getId topo-info)
+        ^TopologyStats topo-stats (.getTopology_stats topo-info)
         stat->window->number
-          {:emitted (.get_window_to_emitted topo-stats)
-           :transferred (.get_window_to_transferred topo-stats)
-           :complete-latencies (.get_window_to_complete_latencies_ms topo-stats)
-           :acked (.get_window_to_acked topo-stats)
-           :failed (.get_window_to_failed topo-stats)}
+          {:emitted (.getWindow_to_emitted topo-stats)
+           :transferred (.getWindow_to_transferred topo-stats)
+           :complete-latencies (.getWindow_to_complete_latencies_ms topo-stats)
+           :acked (.getWindow_to_acked topo-stats)
+           :failed (.getWindow_to_failed topo-stats)}
         topo-stats (topology-stats window stat->window->number)
         [debugEnabled
-         samplingPct] (if-let [debug-opts (.get_debug_options topo-info)]
-                        [(.is_enable debug-opts)
-                         (.get_samplingpct debug-opts)])
-        uptime (.get_uptime_secs topo-info)]
+         samplingPct] (if-let [debug-opts (.getDebug_options topo-info)]
+                        [(.isEnable debug-opts)
+                         (.getSamplingpct debug-opts)])
+        uptime (.getUptime_secs topo-info)]
     {"id" id
      "encodedId" (url-encode id)
-     "owner" (.get_owner topo-info)
-     "name" (.get_name topo-info)
-     "status" (.get_status topo-info)
+     "owner" (.getOwner topo-info)
+     "name" (.getName topo-info)
+     "status" (.getStatus topo-info)
      "uptime" (pretty-uptime-sec uptime)
      "uptimeSeconds" uptime
-     "tasksTotal" (.get_num_tasks topo-info)
-     "workersTotal" (.get_num_workers topo-info)
-     "executorsTotal" (.get_num_executors topo-info)
-     "schedulerInfo" (.get_sched_status topo-info)
-     "requestedMemOnHeap" (.get_requested_memonheap topo-info)
-     "requestedMemOffHeap" (.get_requested_memoffheap topo-info)
-     "requestedCpu" (.get_requested_cpu topo-info)
-     "assignedMemOnHeap" (.get_assigned_memonheap topo-info)
-     "assignedMemOffHeap" (.get_assigned_memoffheap topo-info)
-     "assignedTotalMem" (+ (.get_assigned_memonheap topo-info) (.get_assigned_memoffheap topo-info))
-     "assignedCpu" (.get_assigned_cpu topo-info)
+     "tasksTotal" (.getNum_tasks topo-info)
+     "workersTotal" (.getNum_workers topo-info)
+     "executorsTotal" (.getNum_executors topo-info)
+     "schedulerInfo" (.getSched_status topo-info)
+     "requestedMemOnHeap" (.getRequested_memonheap topo-info)
+     "requestedMemOffHeap" (.getRequested_memoffheap topo-info)
+     "requestedCpu" (.getRequested_cpu topo-info)
+     "assignedMemOnHeap" (.getAssigned_memonheap topo-info)
+     "assignedMemOffHeap" (.getAssigned_memoffheap topo-info)
+     "assignedTotalMem" (+ (.getAssigned_memonheap topo-info) (.getAssigned_memoffheap topo-info))
+     "assignedCpu" (.getAssigned_cpu topo-info)
      "topologyStats" topo-stats
      "spouts" (map (partial comp-agg-stats-json id secure?)
-                   (.get_id_to_spout_agg_stats topo-info))
+                   (.getId_to_spout_agg_stats topo-info))
      "bolts" (map (partial comp-agg-stats-json id secure?)
-                  (.get_id_to_bolt_agg_stats topo-info))
-     "configuration" (.get_topology_conf topo-info)
+                  (.getId_to_bolt_agg_stats topo-info))
+     "configuration" (.getTopology_conf topo-info)
      "debug" (or debugEnabled false)
      "samplingPct" (or samplingPct 10)
-     "replicationCount" (.get_replication_count topo-info)}))
+     "replicationCount" (.getReplication_count topo-info)}))
 
 (defn exec-host-port
   [executors]
   (for [^ExecutorSummary e executors]
-    {"host" (.get_host e)
-     "port" (.get_port e)}))
+    {"host" (.getHost e)
+     "port" (.getPort e)}))
 
 (defn worker-host-port
   "Get the set of all worker host/ports"
   [id]
   (thrift/with-configured-nimbus-connection nimbus
-    (distinct (exec-host-port (.get_executors (get-topology-info nimbus id))))))
+    (distinct (exec-host-port (.getExecutors (get-topology-info nimbus id))))))
 
 (defn topology-page [id window include-sys? user secure?]
   (thrift/with-configured-nimbus-connection nimbus
@@ -614,7 +614,7 @@
                                                id
                                                window
                                                include-sys?)
-          topology-conf (from-json (.get_topology_conf topo-page-info))
+          topology-conf (from-json (.getTopology_conf topo-page-info))
           msg-timeout (topology-conf TOPOLOGY-MESSAGE-TIMEOUT-SECS)]
       (merge
        (unpack-topology-page-info topo-page-info window secure?)
@@ -629,167 +629,167 @@
 (defn component-errors
   [errors-list topology-id secure?]
   (let [errors (->> errors-list
-                    (sort-by #(.get_error_time_secs ^ErrorInfo %))
+                    (sort-by #(.getError_time_secs ^ErrorInfo %))
                     reverse)]
     {"componentErrors"
      (for [^ErrorInfo e errors]
        {"errorTime" (get-error-time e)
-        "errorHost" (.get_host e)
-        "errorPort"  (.get_port e)
-        "errorWorkerLogLink"  (worker-log-link (.get_host e)
-                                               (.get_port e)
+        "errorHost" (.getHost e)
+        "errorPort"  (.getPort e)
+        "errorWorkerLogLink"  (worker-log-link (.getHost e)
+                                               (.getPort e)
                                                topology-id
                                                secure?)
         "errorLapsedSecs" (if-let [t (get-error-time e)] (time-delta t))
-        "error" (.get_error e)})}))
+        "error" (.getError e)})}))
 
 (defmulti unpack-comp-agg-stat
-  (fn [[_ ^ComponentAggregateStats s]] (.get_type s)))
+  (fn [[_ ^ComponentAggregateStats s]] (.getType s)))
 
 (defmethod unpack-comp-agg-stat ComponentType/BOLT
   [[window ^ComponentAggregateStats s]]
-  (let [^CommonAggregateStats comm-s (.get_common_stats s)
-        ^SpecificAggregateStats spec-s (.get_specific_stats s)
-        ^BoltAggregateStats bolt-s (.get_bolt spec-s)]
+  (let [^CommonAggregateStats comm-s (.getCommon_stats s)
+        ^SpecificAggregateStats spec-s (.getSpecific_stats s)
+        ^BoltAggregateStats bolt-s (.getBolt spec-s)]
     {"window" window
      "windowPretty" (window-hint window)
-     "emitted" (.get_emitted comm-s)
-     "transferred" (.get_transferred comm-s)
-     "acked" (.get_acked comm-s)
-     "failed" (.get_failed comm-s)
-     "executeLatency" (float-str (.get_execute_latency_ms bolt-s))
-     "processLatency"  (float-str (.get_process_latency_ms bolt-s))
-     "executed" (.get_executed bolt-s)
-     "capacity" (float-str (.get_capacity bolt-s))}))
+     "emitted" (.getEmitted comm-s)
+     "transferred" (.getTransferred comm-s)
+     "acked" (.getAcked comm-s)
+     "failed" (.getFailed comm-s)
+     "executeLatency" (float-str (.getExecute_latency_ms bolt-s))
+     "processLatency"  (float-str (.getProcess_latency_ms bolt-s))
+     "executed" (.getExecuted bolt-s)
+     "capacity" (float-str (.getCapacity bolt-s))}))
 
 (defmethod unpack-comp-agg-stat ComponentType/SPOUT
   [[window ^ComponentAggregateStats s]]
-  (let [^CommonAggregateStats comm-s (.get_common_stats s)
-        ^SpecificAggregateStats spec-s (.get_specific_stats s)
-        ^SpoutAggregateStats spout-s (.get_spout spec-s)]
+  (let [^CommonAggregateStats comm-s (.getCommon_stats s)
+        ^SpecificAggregateStats spec-s (.getSpecific_stats s)
+        ^SpoutAggregateStats spout-s (.getSpout spec-s)]
     {"window" window
      "windowPretty" (window-hint window)
-     "emitted" (.get_emitted comm-s)
-     "transferred" (.get_transferred comm-s)
-     "acked" (.get_acked comm-s)
-     "failed" (.get_failed comm-s)
-     "completeLatency" (float-str (.get_complete_latency_ms spout-s))}))
+     "emitted" (.getEmitted comm-s)
+     "transferred" (.getTransferred comm-s)
+     "acked" (.getAcked comm-s)
+     "failed" (.getFailed comm-s)
+     "completeLatency" (float-str (.getComplete_latency_ms spout-s))}))
 
 (defn- unpack-bolt-input-stat
   [[^GlobalStreamId s ^ComponentAggregateStats stats]]
-  (let [^SpecificAggregateStats sas (.get_specific_stats stats)
-        ^BoltAggregateStats bas (.get_bolt sas)
-        ^CommonAggregateStats cas (.get_common_stats stats)
-        comp-id (.get_componentId s)]
+  (let [^SpecificAggregateStats sas (.getSpecific_stats stats)
+        ^BoltAggregateStats bas (.getBolt sas)
+        ^CommonAggregateStats cas (.getCommon_stats stats)
+        comp-id (.getComponentId s)]
     {"component" comp-id
      "encodedComponentId" (url-encode comp-id)
-     "stream" (.get_streamId s)
-     "executeLatency" (float-str (.get_execute_latency_ms bas))
-     "processLatency" (float-str (.get_process_latency_ms bas))
-     "executed" (nil-to-zero (.get_executed bas))
-     "acked" (nil-to-zero (.get_acked cas))
-     "failed" (nil-to-zero (.get_failed cas))}))
+     "stream" (.getStreamId s)
+     "executeLatency" (float-str (.getExecute_latency_ms bas))
+     "processLatency" (float-str (.getProcess_latency_ms bas))
+     "executed" (nil-to-zero (.getExecuted bas))
+     "acked" (nil-to-zero (.getAcked cas))
+     "failed" (nil-to-zero (.getFailed cas))}))
 
 (defmulti unpack-comp-output-stat
-  (fn [[_ ^ComponentAggregateStats s]] (.get_type s)))
+  (fn [[_ ^ComponentAggregateStats s]] (.getType s)))
 
 (defmethod unpack-comp-output-stat ComponentType/BOLT
   [[stream-id ^ComponentAggregateStats stats]]
-  (let [^CommonAggregateStats cas (.get_common_stats stats)]
+  (let [^CommonAggregateStats cas (.getCommon_stats stats)]
     {"stream" stream-id
-     "emitted" (nil-to-zero (.get_emitted cas))
-     "transferred" (nil-to-zero (.get_transferred cas))}))
+     "emitted" (nil-to-zero (.getEmitted cas))
+     "transferred" (nil-to-zero (.getTransferred cas))}))
 
 (defmethod unpack-comp-output-stat ComponentType/SPOUT
   [[stream-id ^ComponentAggregateStats stats]]
-  (let [^CommonAggregateStats cas (.get_common_stats stats)
-        ^SpecificAggregateStats spec-s (.get_specific_stats stats)
-        ^SpoutAggregateStats spout-s (.get_spout spec-s)]
+  (let [^CommonAggregateStats cas (.getCommon_stats stats)
+        ^SpecificAggregateStats spec-s (.getSpecific_stats stats)
+        ^SpoutAggregateStats spout-s (.getSpout spec-s)]
     {"stream" stream-id
-     "emitted" (nil-to-zero (.get_emitted cas))
-     "transferred" (nil-to-zero (.get_transferred cas))
-     "completeLatency" (float-str (.get_complete_latency_ms spout-s))
-     "acked" (nil-to-zero (.get_acked cas))
-     "failed" (nil-to-zero (.get_failed cas))}))
+     "emitted" (nil-to-zero (.getEmitted cas))
+     "transferred" (nil-to-zero (.getTransferred cas))
+     "completeLatency" (float-str (.getComplete_latency_ms spout-s))
+     "acked" (nil-to-zero (.getAcked cas))
+     "failed" (nil-to-zero (.getFailed cas))}))
 
 (defmulti unpack-comp-exec-stat
-  (fn [_ _ ^ComponentAggregateStats cas] (.get_type (.get_stats ^ExecutorAggregateStats cas))))
+  (fn [_ _ ^ComponentAggregateStats cas] (.getType (.getStats ^ExecutorAggregateStats cas))))
 
 (defmethod unpack-comp-exec-stat ComponentType/BOLT
   [topology-id secure? ^ExecutorAggregateStats eas]
-  (let [^ExecutorSummary summ (.get_exec_summary eas)
-        ^ExecutorInfo info (.get_executor_info summ)
-        ^ComponentAggregateStats stats (.get_stats eas)
-        ^SpecificAggregateStats ss (.get_specific_stats stats)
-        ^BoltAggregateStats bas (.get_bolt ss)
-        ^CommonAggregateStats cas (.get_common_stats stats)
-        host (.get_host summ)
-        port (.get_port summ)
+  (let [^ExecutorSummary summ (.getExec_summary eas)
+        ^ExecutorInfo info (.getExecutor_info summ)
+        ^ComponentAggregateStats stats (.getStats eas)
+        ^SpecificAggregateStats ss (.getSpecific_stats stats)
+        ^BoltAggregateStats bas (.getBolt ss)
+        ^CommonAggregateStats cas (.getCommon_stats stats)
+        host (.getHost summ)
+        port (.getPort summ)
         exec-id (pretty-executor-info info)
-        uptime (.get_uptime_secs summ)]
+        uptime (.getUptime_secs summ)]
     {"id" exec-id
      "encodedId" (url-encode exec-id)
      "uptime" (pretty-uptime-sec uptime)
      "uptimeSeconds" uptime
      "host" host
      "port" port
-     "emitted" (nil-to-zero (.get_emitted cas))
-     "transferred" (nil-to-zero (.get_transferred cas))
-     "capacity" (float-str (nil-to-zero (.get_capacity bas)))
-     "executeLatency" (float-str (.get_execute_latency_ms bas))
-     "executed" (nil-to-zero (.get_executed bas))
-     "processLatency" (float-str (.get_process_latency_ms bas))
-     "acked" (nil-to-zero (.get_acked cas))
-     "failed" (nil-to-zero (.get_failed cas))
+     "emitted" (nil-to-zero (.getEmitted cas))
+     "transferred" (nil-to-zero (.getTransferred cas))
+     "capacity" (float-str (nil-to-zero (.getCapacity bas)))
+     "executeLatency" (float-str (.getExecute_latency_ms bas))
+     "executed" (nil-to-zero (.getExecuted bas))
+     "processLatency" (float-str (.getProcess_latency_ms bas))
+     "acked" (nil-to-zero (.getAcked cas))
+     "failed" (nil-to-zero (.getFailed cas))
      "workerLogLink" (worker-log-link host port topology-id secure?)}))
 
 (defmethod unpack-comp-exec-stat ComponentType/SPOUT
   [topology-id secure? ^ExecutorAggregateStats eas]
-  (let [^ExecutorSummary summ (.get_exec_summary eas)
-        ^ExecutorInfo info (.get_executor_info summ)
-        ^ComponentAggregateStats stats (.get_stats eas)
-        ^SpecificAggregateStats ss (.get_specific_stats stats)
-        ^SpoutAggregateStats sas (.get_spout ss)
-        ^CommonAggregateStats cas (.get_common_stats stats)
-        host (.get_host summ)
-        port (.get_port summ)
+  (let [^ExecutorSummary summ (.getExec_summary eas)
+        ^ExecutorInfo info (.getExecutor_info summ)
+        ^ComponentAggregateStats stats (.getStats eas)
+        ^SpecificAggregateStats ss (.getSpecific_stats stats)
+        ^SpoutAggregateStats sas (.getSpout ss)
+        ^CommonAggregateStats cas (.getCommon_stats stats)
+        host (.getHost summ)
+        port (.getPort summ)
         exec-id (pretty-executor-info info)
-        uptime (.get_uptime_secs summ)]
+        uptime (.getUptime_secs summ)]
     {"id" exec-id
      "encodedId" (url-encode exec-id)
      "uptime" (pretty-uptime-sec uptime)
      "uptimeSeconds" uptime
      "host" host
      "port" port
-     "emitted" (nil-to-zero (.get_emitted cas))
-     "transferred" (nil-to-zero (.get_transferred cas))
-     "completeLatency" (float-str (.get_complete_latency_ms sas))
-     "acked" (nil-to-zero (.get_acked cas))
-     "failed" (nil-to-zero (.get_failed cas))
+     "emitted" (nil-to-zero (.getEmitted cas))
+     "transferred" (nil-to-zero (.getTransferred cas))
+     "completeLatency" (float-str (.getComplete_latency_ms sas))
+     "acked" (nil-to-zero (.getAcked cas))
+     "failed" (nil-to-zero (.getFailed cas))
      "workerLogLink" (worker-log-link host port topology-id secure?)}))
 
 (defmulti unpack-component-page-info
   "Unpacks component-specific info to clojure data structures"
   (fn [^ComponentPageInfo info & _]
-    (.get_component_type info)))
+    (.getComponent_type info)))
 
 (defmethod unpack-component-page-info ComponentType/BOLT
   [^ComponentPageInfo info topology-id window include-sys? secure?]
   (merge
-    {"boltStats" (map unpack-comp-agg-stat (.get_window_to_stats info))
-     "inputStats" (map unpack-bolt-input-stat (.get_gsid_to_input_stats info))
-     "outputStats" (map unpack-comp-output-stat (.get_sid_to_output_stats info))
+    {"boltStats" (map unpack-comp-agg-stat (.getWindow_to_stats info))
+     "inputStats" (map unpack-bolt-input-stat (.getGsid_to_input_stats info))
+     "outputStats" (map unpack-comp-output-stat (.getSid_to_output_stats info))
      "executorStats" (map (partial unpack-comp-exec-stat topology-id secure?)
-                          (.get_exec_stats info))}
+                          (.getExec_stats info))}
     (-> info .get_errors (component-errors topology-id secure?))))
 
 (defmethod unpack-component-page-info ComponentType/SPOUT
   [^ComponentPageInfo info topology-id window include-sys? secure?]
   (merge
-    {"spoutSummary" (map unpack-comp-agg-stat (.get_window_to_stats info))
-     "outputStats" (map unpack-comp-output-stat (.get_sid_to_output_stats info))
+    {"spoutSummary" (map unpack-comp-agg-stat (.getWindow_to_stats info))
+     "outputStats" (map unpack-comp-output-stat (.getSid_to_output_stats info))
      "executorStats" (map (partial unpack-comp-exec-stat topology-id secure?)
-                          (.get_exec_stats info))}
+                          (.getExec_stats info))}
     (-> info .get_errors (component-errors topology-id secure?))))
 
 (defn get-active-profile-actions
@@ -822,9 +822,9 @@
                                                      topology-id))
           msg-timeout (topology-conf TOPOLOGY-MESSAGE-TIMEOUT-SECS)
           [debugEnabled
-           samplingPct] (if-let [debug-opts (.get_debug_options comp-page-info)]
-                          [(.is_enable debug-opts)
-                           (.get_samplingpct debug-opts)])]
+           samplingPct] (if-let [debug-opts (.getDebug_options comp-page-info)]
+                          [(.isEnable debug-opts)
+                           (.getSamplingpct debug-opts)])]
       (assoc
        (unpack-component-page-info comp-page-info
                                    topology-id
@@ -834,21 +834,21 @@
        "user" user
        "id" component
        "encodedId" (url-encode component)
-       "name" (.get_topology_name comp-page-info)
-       "executors" (.get_num_executors comp-page-info)
-       "tasks" (.get_num_tasks comp-page-info)
+       "name" (.getTopology_name comp-page-info)
+       "executors" (.getNum_executors comp-page-info)
+       "tasks" (.getNum_tasks comp-page-info)
        "topologyId" topology-id
-       "topologyStatus" (.get_topology_status comp-page-info)
+       "topologyStatus" (.getTopology_status comp-page-info)
        "encodedTopologyId" (url-encode topology-id)
        "window" window
-       "componentType" (-> comp-page-info .get_component_type str lower-case)
+       "componentType" (-> comp-page-info .getComponent_type str lower-case)
        "windowHint" window-hint
        "debug" (or debugEnabled false)
        "samplingPct" (or samplingPct 10)
        "eventLogLink" (event-log-link topology-id
                                       component
-                                      (.get_eventlog_host comp-page-info)
-                                      (.get_eventlog_port comp-page-info)
+                                      (.getEventlog_host comp-page-info)
+                                      (.getEventlog_port comp-page-info)
                                       secure?)
        "profilingAndDebuggingCapable" (not on-windows?)
        "profileActionEnabled" (*STORM-CONF* WORKER-PROFILER-ENABLED)
@@ -858,10 +858,10 @@
     
 (defn- level-to-dict [level]
   (if level
-    (let [timeout (.get_reset_log_level_timeout_secs level)
-          timeout-epoch (.get_reset_log_level_timeout_epoch level)
-          target-level (.get_target_log_level level)
-          reset-level (.get_reset_log_level level)]
+    (let [timeout (.getReset_log_level_timeout_secs level)
+          timeout-epoch (.getReset_log_level_timeout_epoch level)
+          target-level (.getTarget_log_level level)
+          reset-level (.getReset_log_level level)]
           {"target_level" (.toString (Level/toLevel target-level))
            "reset_level" (.toString (Level/toLevel reset-level))
            "timeout" timeout
@@ -872,7 +872,7 @@
     nimbus
     (let [log-config (.getLogConfig ^Nimbus$Client nimbus topology-id)
           named-logger-levels (into {}
-                                (for [[key val] (.get_named_logger_level log-config)]
+                                (for [[key val] (.getNamed_logger_level log-config)]
                                   [(str key) (level-to-dict val)]))]
       {"namedLoggerLevels" named-logger-levels})))
 
@@ -990,9 +990,9 @@
     (thrift/with-configured-nimbus-connection nimbus
        (let [tplg (->> (doto
                         (GetInfoOptions.)
-                        (.set_num_err_choice NumErrorsChoice/NONE))
+                        (.setNum_err_choice NumErrorsChoice/NONE))
                       (.getTopologyInfoWithOpts ^Nimbus$Client nimbus id))
-            name (.get_name tplg)]
+            name (.getName tplg)]
         (.activate nimbus name)
         (log-message "Activating topology '" name "'")))
     (json-response (topology-op-response id "activate") (m "callback")))
@@ -1003,9 +1003,9 @@
     (thrift/with-configured-nimbus-connection nimbus
         (let [tplg (->> (doto
                         (GetInfoOptions.)
-                        (.set_num_err_choice NumErrorsChoice/NONE))
+                        (.setNum_err_choice NumErrorsChoice/NONE))
                       (.getTopologyInfoWithOpts ^Nimbus$Client nimbus id))
-            name (.get_name tplg)]
+            name (.getName tplg)]
         (.deactivate nimbus name)
         (log-message "Deactivating topology '" name "'")))
     (json-response (topology-op-response id "deactivate") (m "callback")))
@@ -1016,9 +1016,9 @@
     (thrift/with-configured-nimbus-connection nimbus
         (let [tplg (->> (doto
                         (GetInfoOptions.)
-                        (.set_num_err_choice NumErrorsChoice/NONE))
+                        (.setNum_err_choice NumErrorsChoice/NONE))
                    (.getTopologyInfoWithOpts ^Nimbus$Client nimbus id))
-            name (.get_name tplg)
+            name (.getName tplg)
             enable? (= "enable" action)]
         (.debug nimbus name "" enable? (Integer/parseInt spct))
         (log-message "Debug topology [" name "] action [" action "] sampling pct [" spct "]")))
@@ -1030,9 +1030,9 @@
     (thrift/with-configured-nimbus-connection nimbus
       (let [tplg (->> (doto
                         (GetInfoOptions.)
-                        (.set_num_err_choice NumErrorsChoice/NONE))
+                        (.setNum_err_choice NumErrorsChoice/NONE))
                    (.getTopologyInfoWithOpts ^Nimbus$Client nimbus id))
-            name (.get_name tplg)
+            name (.getName tplg)
             enable? (= "enable" action)]
         (.debug nimbus name component enable? (Integer/parseInt spct))
         (log-message "Debug topology [" name "] component [" component "] action [" action "] sampling pct [" spct "]")))
@@ -1044,17 +1044,17 @@
     (thrift/with-configured-nimbus-connection nimbus
       (let [tplg (->> (doto
                         (GetInfoOptions.)
-                        (.set_num_err_choice NumErrorsChoice/NONE))
+                        (.setNum_err_choice NumErrorsChoice/NONE))
                       (.getTopologyInfoWithOpts ^Nimbus$Client nimbus id))
-            name (.get_name tplg)
+            name (.getName tplg)
             rebalance-options (m "rebalanceOptions")
             options (RebalanceOptions.)]
-        (.set_wait_secs options (Integer/parseInt wait-time))
+        (.setWait_secs options (Integer/parseInt wait-time))
         (if (and (not-nil? rebalance-options) (contains? rebalance-options "numWorkers"))
-          (.set_num_workers options (Integer/parseInt (.toString (rebalance-options "numWorkers")))))
+          (.setNum_workers options (Integer/parseInt (.toString (rebalance-options "numWorkers")))))
         (if (and (not-nil? rebalance-options) (contains? rebalance-options "executors"))
           (doseq [keyval (rebalance-options "executors")]
-            (.put_to_num_executors options (key keyval) (Integer/parseInt (.toString (val keyval))))))
+            (.putTo_num_executors options (key keyval) (Integer/parseInt (.toString (val keyval))))))
         (.rebalance nimbus name options)
         (log-message "Rebalancing topology '" name "' with wait time: " wait-time " secs")))
     (json-response (topology-op-response id "rebalance") (m "callback")))
@@ -1065,11 +1065,11 @@
     (thrift/with-configured-nimbus-connection nimbus
       (let [tplg (->> (doto
                         (GetInfoOptions.)
-                        (.set_num_err_choice NumErrorsChoice/NONE))
+                        (.setNum_err_choice NumErrorsChoice/NONE))
                       (.getTopologyInfoWithOpts ^Nimbus$Client nimbus id))
-            name (.get_name tplg)
+            name (.getName tplg)
             options (KillOptions.)]
-        (.set_wait_secs options (Integer/parseInt wait-time))
+        (.setWait_secs options (Integer/parseInt wait-time))
         (.killTopologyWithOpts nimbus name options)
         (log-message "Killing topology '" name "' with wait time: " wait-time " secs")))
     (json-response (topology-op-response id "kill") (m "callback")))
@@ -1089,15 +1089,15 @@
               (log-message "The target level for " logger-name " is " target-level)
               (if (nil? target-level)
                 (do
-                  (.set_action named-logger-level LogLevelAction/REMOVE)
-                  (.unset_target_log_level named-logger-level))
+                  (.setAction named-logger-level LogLevelAction/REMOVE)
+                  (.unsetTarget_log_level named-logger-level))
                 (do
-                  (.set_action named-logger-level LogLevelAction/UPDATE)
+                  (.setAction named-logger-level LogLevelAction/UPDATE)
                   ;; the toLevel here ensures the string we get is valid
-                  (.set_target_log_level named-logger-level (.name (Level/toLevel target-level)))
-                  (.set_reset_log_level_timeout_secs named-logger-level timeout)))
+                  (.setTarget_log_level named-logger-level (.name (Level/toLevel target-level)))
+                  (.setReset_log_level_timeout_secs named-logger-level timeout)))
               (log-message "Adding this " logger-name " " named-logger-level " to " new-log-config)
-              (.put_to_named_logger_level new-log-config logger-name named-logger-level)))
+              (.putTo_named_logger_level new-log-config logger-name named-logger-level)))
         (log-message "Setting topology " id " log config " new-log-config)
         (.setLogConfig nimbus id new-log-config)
         (json-response (log-config id) (m "callback")))))
@@ -1114,7 +1114,7 @@
                    timestamp (+ (System/currentTimeMillis) (* 60000 (Long. timeout)))
                    request (ProfileRequest. nodeinfo
                                             ProfileAction/JPROFILE_STOP)]
-               (.set_time_stamp request timestamp)
+               (.setTime_stamp request timestamp)
                (.setWorkerProfiler nimbus id request)
                (json-response {"status" "ok"
                                "id" host-port
@@ -1138,7 +1138,7 @@
                    timestamp 0
                    request (ProfileRequest. nodeinfo
                                             ProfileAction/JPROFILE_STOP)]
-               (.set_time_stamp request timestamp)
+               (.setTime_stamp request timestamp)
                (.setWorkerProfiler nimbus id request)
                (json-response {"status" "ok"
                                "id" host-port}
@@ -1157,7 +1157,7 @@
                    timestamp (System/currentTimeMillis)
                    request (ProfileRequest. nodeinfo
                                             ProfileAction/JPROFILE_DUMP)]
-               (.set_time_stamp request timestamp)
+               (.setTime_stamp request timestamp)
                (.setWorkerProfiler nimbus id request)
                (json-response {"status" "ok"
                                "id" host-port}
@@ -1174,7 +1174,7 @@
                timestamp (System/currentTimeMillis)
                request (ProfileRequest. nodeinfo
                                         ProfileAction/JSTACK_DUMP)]
-           (.set_time_stamp request timestamp)
+           (.setTime_stamp request timestamp)
            (.setWorkerProfiler nimbus id request)
            (json-response {"status" "ok"
                            "id" host-port}
@@ -1190,7 +1190,7 @@
                timestamp (System/currentTimeMillis)
                request (ProfileRequest. nodeinfo
                                         ProfileAction/JVM_RESTART)]
-           (.set_time_stamp request timestamp)
+           (.setTime_stamp request timestamp)
            (.setWorkerProfiler nimbus id request)
            (json-response {"status" "ok"
                            "id" host-port}
@@ -1206,7 +1206,7 @@
                timestamp (System/currentTimeMillis)
                request (ProfileRequest. nodeinfo
                                         ProfileAction/JMAP_DUMP)]
-           (.set_time_stamp request timestamp)
+           (.setTime_stamp request timestamp)
            (.setWorkerProfiler nimbus id request)
            (json-response {"status" "ok"
                            "id" host-port}

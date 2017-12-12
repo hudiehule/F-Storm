@@ -43,9 +43,9 @@ public class ResourceUtils {
 
     public static Map<String, Map<String, Double>> getBoltsResources(StormTopology topology, Map topologyConf) {
         Map<String, Map<String, Double>> boltResources = new HashMap<String, Map<String, Double>>();
-        if (topology.get_bolts() != null) {
-            for (Map.Entry<String, Bolt> bolt : topology.get_bolts().entrySet()) {
-                Map<String, Double> topology_resources = parseResources(bolt.getValue().get_common().get_json_conf());
+        if (topology.getBolts() != null) {
+            for (Map.Entry<String, Bolt> bolt : topology.getBolts().entrySet()) {
+                Map<String, Double> topology_resources = parseResources(bolt.getValue().getCommon().getJson_conf());
                 checkIntialization(topology_resources, bolt.getValue().toString(), topologyConf);
                 boltResources.put(bolt.getKey(), topology_resources);
             }
@@ -55,9 +55,9 @@ public class ResourceUtils {
 
     public static Map<String, Map<String, Double>> getSpoutsResources(StormTopology topology, Map topologyConf) {
         Map<String, Map<String, Double>> spoutResources = new HashMap<String, Map<String, Double>>();
-        if (topology.get_spouts() != null) {
-            for (Map.Entry<String, SpoutSpec> spout : topology.get_spouts().entrySet()) {
-                Map<String, Double> topology_resources = parseResources(spout.getValue().get_common().get_json_conf());
+        if (topology.getSpouts() != null) {
+            for (Map.Entry<String, SpoutSpec> spout : topology.getSpouts().entrySet()) {
+                Map<String, Double> topology_resources = parseResources(spout.getValue().getCommon().getJson_conf());
                 checkIntialization(topology_resources, spout.getValue().toString(), topologyConf);
                 spoutResources.put(spout.getKey(), topology_resources);
             }

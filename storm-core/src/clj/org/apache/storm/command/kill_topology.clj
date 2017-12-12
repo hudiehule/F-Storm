@@ -22,7 +22,7 @@
 (defn -main [& args]
   (let [[{wait :wait} [name] _] (cli args ["-w" "--wait" :default nil :parse-fn #(Integer/parseInt %)])
         opts (KillOptions.)]
-    (if wait (.set_wait_secs opts wait))
+    (if wait (.setWait_secs opts wait))
     (with-configured-nimbus-connection nimbus
       (.killTopologyWithOpts nimbus name opts)
       (log-message "Killed topology: " name)

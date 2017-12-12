@@ -33,7 +33,7 @@ public class IdentityGrouping implements CustomStreamGrouping {
     
     @Override
     public void prepare(WorkerTopologyContext context, GlobalStreamId stream, List<Integer> tasks) {
-        List<Integer> sourceTasks = new ArrayList<>(context.getComponentTasks(stream.get_componentId()));
+        List<Integer> sourceTasks = new ArrayList<>(context.getComponentTasks(stream.getComponentId()));
         Collections.sort(sourceTasks);
         if(sourceTasks.size()!=tasks.size()) {
             throw new RuntimeException("Can only do an identity grouping when source and target have same number of tasks");

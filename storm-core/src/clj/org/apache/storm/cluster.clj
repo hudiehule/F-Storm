@@ -421,9 +421,9 @@
 
       (set-worker-profile-request
         [this storm-id profile-request]
-        (let [request-type (.get_action profile-request)
-              host (.get_node (.get_nodeInfo profile-request))
-              port (first (.get_port (.get_nodeInfo profile-request)))]
+        (let [request-type (.getAction profile-request)
+              host (.getNode (.getNodeInfo profile-request))
+              port (first (.getPort (.getNodeInfo profile-request)))]
           (.set_data cluster-state
                      (profiler-config-path storm-id host port request-type)
                      (Utils/serialize profile-request)
@@ -456,7 +456,7 @@
               port (:port node-info)
               profile-requests (get-topology-profile-requests this storm-id thrift?)]
           (if thrift?
-            (filter #(and (= host (.get_node (.get_nodeInfo %))) (= port (first (.get_port (.get_nodeInfo  %)))))
+            (filter #(and (= host (.getNode (.getNodeInfo %))) (= port (first (.getPort (.getNodeInfo  %)))))
                     profile-requests)
             (filter #(and (= host (:host %)) (= port (:port %)))
                     profile-requests))))

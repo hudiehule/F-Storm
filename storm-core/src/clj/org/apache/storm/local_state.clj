@@ -37,10 +37,10 @@
 (defn ->topo-history
   [thrift-topo-hist]
   {
-    :topoid (.get_topology_id thrift-topo-hist)
-    :timestamp (.get_time_stamp thrift-topo-hist)
-    :users (.get_users thrift-topo-hist)
-    :groups (.get_groups thrift-topo-hist)})
+    :topoid (.getTopology_id thrift-topo-hist)
+    :timestamp (.getTime_stamp thrift-topo-hist)
+    :users (.getUsers thrift-topo-hist)
+    :groups (.getGroups thrift-topo-hist)})
 
 (defn ls-topo-hist!
   [^LocalState local-state hist-list]
@@ -50,7 +50,7 @@
 (defn ls-topo-hist
   [^LocalState local-state]
   (if-let [thrift-hist-list (.get local-state LS-TOPO-HISTORY)]
-    (map ->topo-history (.get_topo_history thrift-hist-list))))
+    (map ->topo-history (.getTopo_history thrift-hist-list))))
 
 (defn ls-supervisor-id!
   [^LocalState local-state ^String id]
@@ -59,7 +59,7 @@
 (defn ls-supervisor-id
   [^LocalState local-state]
   (if-let [super-id (.get local-state LS-ID)]
-    (.get_supervisor_id super-id)))
+    (.getSupervisor_id super-id)))
 
 (defn ls-approved-workers!
   [^LocalState local-state workers]
@@ -68,7 +68,7 @@
 (defn ls-approved-workers
   [^LocalState local-state]
   (if-let [tmp (.get local-state LS-APPROVED-WORKERS)]
-    (into {} (.get_approved_workers tmp))))
+    (into {} (.getApproved_workers tmp))))
 
 (defn ->ExecutorInfo
   [[low high]] (ExecutorInfo. low high))
@@ -81,16 +81,16 @@
   [executors]
   (into [] 
     (for [exec-info executors] 
-      [(.get_task_start exec-info) (.get_task_end exec-info)])))
+      [(.getTask_start exec-info) (.getTask_end exec-info)])))
 
 (defn ->LocalAssignment
   [{storm-id :storm-id executors :executors resources :resources}]
   (let [assignment (LocalAssignment. storm-id (->ExecutorInfo-list executors))]
-    (if resources (.set_resources assignment
+    (if resources (.setResources assignment
                                   (doto (WorkerResources. )
-                                    (.set_mem_on_heap (first resources))
-                                    (.set_mem_off_heap (second resources))
-                                    (.set_cpu (last resources)))))
+                                    (.setMem_on_heap (first resources))
+                                    (.setMem_off_heap (second resources))
+                                    (.setCpu (last resources)))))
     assignment))
 
 (defn mk-local-assignment
@@ -100,9 +100,9 @@
 (defn ->local-assignment
   [^LocalAssignment thrift-local-assignment]
     (mk-local-assignment
-      (.get_topology_id thrift-local-assignment)
-      (->executor-list (.get_executors thrift-local-assignment))
-      (.get_resources thrift-local-assignment)))
+      (.getTopology_id thrift-local-assignment)
+      (->executor-list (.getExecutors thrift-local-assignment))
+      (.getResources thrift-local-assignment)))
 
 (defn ls-local-assignments!
   [^LocalState local-state assignments]
@@ -115,7 +115,7 @@
     (if-let [thrift-local-assignments (.get local-state LS-LOCAL-ASSIGNMENTS)]
       (map-val
         ->local-assignment
-        (.get_assignments thrift-local-assignments))))
+        (.getAssignments thrift-local-assignments))))
 
 (defn ls-worker-heartbeat!
   [^LocalState local-state time-secs storm-id executors port]
@@ -124,8 +124,8 @@
 (defn ls-worker-heartbeat 
   [^LocalState local-state]
   (if-let [worker-hb (.get local-state LS-WORKER-HEARTBEAT)]
-    {:time-secs (.get_time_secs worker-hb)
-     :storm-id (.get_topology_id worker-hb)
-     :executors (->executor-list (.get_executors worker-hb))
-     :port (.get_port worker-hb)}))
+    {:time-secs (.getTime_secs worker-hb)
+     :storm-id (.getTopology_id worker-hb)
+     :executors (->executor-list (.getExecutors worker-hb))
+     :port (.getPort worker-hb)}))
 

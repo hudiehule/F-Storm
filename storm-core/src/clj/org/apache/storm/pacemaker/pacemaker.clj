@@ -111,8 +111,8 @@
                 (HBMessageData/boolval it-does))))
 
 (defn send-pulse [^HBPulse pulse heartbeats pacemaker-stats]
-  (let [id (.get_id pulse)
-        details (.get_details pulse)]
+  (let [id (.getId pulse)
+        details (.getDetails pulse)]
     (log-debug (str "Saving Pulse for id [" id "] data [" + (str details) "]."))
 
     (.incrementAndGet (:send-pulse-count pacemaker-stats))
@@ -150,7 +150,7 @@
 
     (HBMessage. HBServerMessageType/GET_PULSE_RESPONSE
                 (HBMessageData/pulse
-                 (doto (HBPulse. ) (.set_id path) (.set_details details))))))
+                 (doto (HBPulse. ) (.setId path) (.setDetails details))))))
 
 (defn delete-pulse-id [^String path heartbeats]
   (log-debug (str "Deleting Pulse for id [" path "]."))
@@ -190,43 +190,43 @@
       IServerMessageHandler
       (^HBMessage handleMessage [this ^HBMessage request ^boolean authenticated]
         (let [response
-              (condp = (.get_type request)
+              (condp = (.getType request)
                 HBServerMessageType/CREATE_PATH
-                (create-path (.get_path (.get_data request)) heartbeats)
+                (create-path (.getPath (.getData request)) heartbeats)
 
                 HBServerMessageType/EXISTS
                 (if authenticated
-                  (exists (.get_path (.get_data request)) heartbeats)
+                  (exists (.getPath (.getData request)) heartbeats)
                   (not-authorized))
 
                 HBServerMessageType/SEND_PULSE
-                (send-pulse (.get_pulse (.get_data request)) heartbeats pacemaker-stats)
+                (send-pulse (.getPulse (.getData request)) heartbeats pacemaker-stats)
 
                 HBServerMessageType/GET_ALL_PULSE_FOR_PATH
                 (if authenticated
-                  (get-all-pulse-for-path (.get_path (.get_data request)) heartbeats)
+                  (get-all-pulse-for-path (.getPath (.getData request)) heartbeats)
                   (not-authorized))
 
                 HBServerMessageType/GET_ALL_NODES_FOR_PATH
                 (if authenticated
-                  (get-all-nodes-for-path (.get_path (.get_data request)) heartbeats)
+                  (get-all-nodes-for-path (.getPath (.getData request)) heartbeats)
                   (not-authorized))
 
                 HBServerMessageType/GET_PULSE
                 (if authenticated
-                  (get-pulse (.get_path (.get_data request)) heartbeats pacemaker-stats)
+                  (get-pulse (.getPath (.getData request)) heartbeats pacemaker-stats)
                   (not-authorized))
 
                 HBServerMessageType/DELETE_PATH
-                (delete-path (.get_path (.get_data request)) heartbeats)
+                (delete-path (.getPath (.getData request)) heartbeats)
 
                 HBServerMessageType/DELETE_PULSE_ID
-                (delete-pulse-id (.get_path (.get_data request)) heartbeats)
+                (delete-pulse-id (.getPath (.getData request)) heartbeats)
 
                 ; Otherwise
-                (log-message "Got Unexpected Type: " (.get_type request)))]
+                (log-message "Got Unexpected Type: " (.getType request)))]
 
-          (.set_message_id response (.get_message_id request))
+          (.setMessage_id response (.getMessage_id request))
           response)))))
 
 (defn launch-server! []

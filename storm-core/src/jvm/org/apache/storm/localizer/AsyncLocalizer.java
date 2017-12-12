@@ -287,7 +287,7 @@ public class AsyncLocalizer implements ILocalizer, Shutdownable {
 
     @Override
     public synchronized Future<Void> requestDownloadBaseTopologyBlobs(final LocalAssignment assignment, final int port) throws IOException {
-        final String topologyId = assignment.get_topology_id();
+        final String topologyId = assignment.getTopology_id();
         LocalDownloadedResource localResource = _basicPending.get(topologyId);
         if (localResource == null) {
             Callable<Void> c;
@@ -322,7 +322,7 @@ public class AsyncLocalizer implements ILocalizer, Shutdownable {
     
     @Override
     public synchronized void recoverRunningTopology(LocalAssignment assignment, int port) {
-        final String topologyId = assignment.get_topology_id();
+        final String topologyId = assignment.getTopology_id();
         LocalDownloadedResource localResource = _basicPending.get(topologyId);
         if (localResource == null) {
             localResource = new LocalDownloadedResource(new AllDoneFuture());
@@ -342,7 +342,7 @@ public class AsyncLocalizer implements ILocalizer, Shutdownable {
     
     @Override
     public synchronized Future<Void> requestDownloadTopologyBlobs(LocalAssignment assignment, int port) {
-        final String topologyId = assignment.get_topology_id();
+        final String topologyId = assignment.getTopology_id();
         LocalDownloadedResource localResource = _blobPending.get(topologyId);
         if (localResource == null) {
             Callable<Void> c = new DownloadBlobs(topologyId);
@@ -356,7 +356,7 @@ public class AsyncLocalizer implements ILocalizer, Shutdownable {
 
     @Override
     public synchronized void releaseSlotFor(LocalAssignment assignment, int port) throws IOException {
-        final String topologyId = assignment.get_topology_id();
+        final String topologyId = assignment.getTopology_id();
         LOG.debug("Releasing slot for {} {}", topologyId, port);
         LocalDownloadedResource localResource = _blobPending.get(topologyId);
         if (localResource == null || !localResource.release(port, assignment)) {

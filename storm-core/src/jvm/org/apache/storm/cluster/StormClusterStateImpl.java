@@ -251,7 +251,7 @@ public class StormClusterStateImpl implements IStormClusterState {
         List<ProfileRequest> requests = new ArrayList<>();
         List<ProfileRequest> profileRequests = getTopologyProfileRequests(stormId);
         for (ProfileRequest profileRequest : profileRequests) {
-            NodeInfo nodeInfo1 = profileRequest.get_nodeInfo();
+            NodeInfo nodeInfo1 = profileRequest.getNodeInfo();
             if (nodeInfo1.equals(nodeInfo))
                 requests.add(profileRequest);
         }
@@ -277,18 +277,18 @@ public class StormClusterStateImpl implements IStormClusterState {
 
     @Override
     public void setWorkerProfileRequest(String stormId, ProfileRequest profileRequest) {
-        ProfileAction profileAction = profileRequest.get_action();
-        String host = profileRequest.get_nodeInfo().get_node();
-        Long port = profileRequest.get_nodeInfo().get_port_iterator().next();
+        ProfileAction profileAction = profileRequest.getAction();
+        String host = profileRequest.getNodeInfo().getNode();
+        Long port = profileRequest.getNodeInfo().getPortIterator().next();
         String path = ClusterUtils.profilerConfigPath(stormId, host, port, profileAction);
         stateStorage.set_data(path, Utils.serialize(profileRequest), acls);
     }
 
     @Override
     public void deleteTopologyProfileRequests(String stormId, ProfileRequest profileRequest) {
-        ProfileAction profileAction = profileRequest.get_action();
-        String host = profileRequest.get_nodeInfo().get_node();
-        Long port = profileRequest.get_nodeInfo().get_port_iterator().next();
+        ProfileAction profileAction = profileRequest.getAction();
+        String host = profileRequest.getNodeInfo().getNode();
+        Long port = profileRequest.getNodeInfo().getPortIterator().next();
         String path = ClusterUtils.profilerConfigPath(stormId, host, port, profileAction);
         stateStorage.delete_node(path);
     }
@@ -310,8 +310,8 @@ public class StormClusterStateImpl implements IStormClusterState {
 
         for (Map.Entry<NodeInfo, List<List<Long>>> entry : nodePortExecutors.entrySet()) {
 
-            String node = entry.getKey().get_node();
-            Long port = entry.getKey().get_port_iterator().next();
+            String node = entry.getKey().getNode();
+            Long port = entry.getKey().getPortIterator().next();
             ClusterWorkerHeartbeat whb = getWorkerHeartbeat(stormId, node, port);
             List<ExecutorInfo> executorInfoList = new ArrayList<>();
             for (List<Long> list : entry.getValue()) {
@@ -510,27 +510,27 @@ public class StormClusterStateImpl implements IStormClusterState {
     public void updateStorm(String stormId, StormBase newElems) {
 
         StormBase stormBase = stormBase(stormId, null);
-        if (stormBase.get_component_executors() != null) {
+        if (stormBase.getComponent_executors() != null) {
 
             Map<String, Integer> newComponentExecutors = new HashMap<>();
-            Map<String, Integer> componentExecutors = newElems.get_component_executors();
+            Map<String, Integer> componentExecutors = newElems.getComponent_executors();
             // componentExecutors maybe be APersistentMap, which don't support "put"
             for (Map.Entry<String, Integer> entry : componentExecutors.entrySet()) {
                 newComponentExecutors.put(entry.getKey(), entry.getValue());
             }
-            for (Map.Entry<String, Integer> entry : stormBase.get_component_executors().entrySet()) {
+            for (Map.Entry<String, Integer> entry : stormBase.getComponent_executors().entrySet()) {
                 if (!componentExecutors.containsKey(entry.getKey())) {
                     newComponentExecutors.put(entry.getKey(), entry.getValue());
                 }
             }
             if (newComponentExecutors.size() > 0)
-                newElems.set_component_executors(newComponentExecutors);
+                newElems.setComponent_executors(newComponentExecutors);
         }
 
         Map<String, DebugOptions> ComponentDebug = new HashMap<>();
-        Map<String, DebugOptions> oldComponentDebug = stormBase.get_component_debug();
+        Map<String, DebugOptions> oldComponentDebug = stormBase.getComponent_debug();
 
-        Map<String, DebugOptions> newComponentDebug = newElems.get_component_debug();
+        Map<String, DebugOptions> newComponentDebug = newElems.getComponent_debug();
         /// oldComponentDebug.keySet()/ newComponentDebug.keySet() maybe be APersistentSet, which don't support addAll
         Set<String> debugOptionsKeys = new HashSet<>();
         debugOptionsKeys.addAll(oldComponentDebug.keySet());
@@ -539,42 +539,42 @@ public class StormClusterStateImpl implements IStormClusterState {
             boolean enable = false;
             double samplingpct = 0;
             if (oldComponentDebug.containsKey(key)) {
-                enable = oldComponentDebug.get(key).is_enable();
-                samplingpct = oldComponentDebug.get(key).get_samplingpct();
+                enable = oldComponentDebug.get(key).isEnable();
+                samplingpct = oldComponentDebug.get(key).getSamplingpct();
             }
             if (newComponentDebug.containsKey(key)) {
-                enable = newComponentDebug.get(key).is_enable();
-                samplingpct += newComponentDebug.get(key).get_samplingpct();
+                enable = newComponentDebug.get(key).isEnable();
+                samplingpct += newComponentDebug.get(key).getSamplingpct();
             }
             DebugOptions debugOptions = new DebugOptions();
-            debugOptions.set_enable(enable);
-            debugOptions.set_samplingpct(samplingpct);
+            debugOptions.setEnable(enable);
+            debugOptions.setSamplingpct(samplingpct);
             ComponentDebug.put(key, debugOptions);
         }
         if (ComponentDebug.size() > 0) {
-            newElems.set_component_debug(ComponentDebug);
+            newElems.setComponent_debug(ComponentDebug);
         }
 
-        if (StringUtils.isBlank(newElems.get_name())) {
-            newElems.set_name(stormBase.get_name());
+        if (StringUtils.isBlank(newElems.getName())) {
+            newElems.setName(stormBase.getName());
         }
-        if (newElems.get_status() == null) {
-            newElems.set_status(stormBase.get_status());
+        if (newElems.getStatus() == null) {
+            newElems.setStatus(stormBase.getStatus());
         }
-        if (newElems.get_num_workers() == 0) {
-            newElems.set_num_workers(stormBase.get_num_workers());
+        if (newElems.getNum_workers() == 0) {
+            newElems.setNum_workers(stormBase.getNum_workers());
         }
-        if (newElems.get_launch_time_secs() == 0) {
-            newElems.set_launch_time_secs(stormBase.get_launch_time_secs());
+        if (newElems.getLaunch_time_secs() == 0) {
+            newElems.setLaunch_time_secs(stormBase.getLaunch_time_secs());
         }
-        if (StringUtils.isBlank(newElems.get_owner())) {
-            newElems.set_owner(stormBase.get_owner());
+        if (StringUtils.isBlank(newElems.getOwner())) {
+            newElems.setOwner(stormBase.getOwner());
         }
-        if (newElems.get_topology_action_options() == null) {
-            newElems.set_topology_action_options(stormBase.get_topology_action_options());
+        if (newElems.getTopology_action_options() == null) {
+            newElems.setTopology_action_options(stormBase.getTopology_action_options());
         }
-        if (newElems.get_status() == null) {
-            newElems.set_status(stormBase.get_status());
+        if (newElems.getStatus() == null) {
+            newElems.setStatus(stormBase.getStatus());
         }
         stateStorage.set_data(ClusterUtils.stormPath(stormId), Utils.serialize(newElems), acls);
     }
@@ -640,8 +640,8 @@ public class StormClusterStateImpl implements IStormClusterState {
         String path = ClusterUtils.errorPath(stormId, componentId);
         String lastErrorPath = ClusterUtils.lastErrorPath(stormId, componentId);
         ErrorInfo errorInfo = new ErrorInfo(ClusterUtils.stringifyError(error), Time.currentTimeSecs());
-        errorInfo.set_host(node);
-        errorInfo.set_port(port.intValue());
+        errorInfo.setHost(node);
+        errorInfo.setPort(port.intValue());
         byte[] serData = Utils.serialize(errorInfo);
         stateStorage.mkdirs(path, acls);
         stateStorage.create_sequential(path + ClusterUtils.ZK_SEPERATOR + "e", serData, acls);
@@ -674,7 +674,7 @@ public class StormClusterStateImpl implements IStormClusterState {
         }
         Collections.sort(errorInfos, new Comparator<ErrorInfo>() {
             public int compare(ErrorInfo arg0, ErrorInfo arg1) {
-                return Integer.compare(arg1.get_error_time_secs(), arg0.get_error_time_secs());
+                return Integer.compare(arg1.getError_time_secs(), arg0.getError_time_secs());
             }
         });
 

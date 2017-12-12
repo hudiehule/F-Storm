@@ -122,7 +122,7 @@ public class BlobStoreUtils {
                 remoteBlobStore = new NimbusBlobStore();
                 remoteBlobStore.setClient(conf, client);
                 in = remoteBlobStore.getBlob(key);
-                blobStore.createBlob(key, in, rbm.get_settable(), getNimbusSubject());
+                blobStore.createBlob(key, in, rbm.getSettable(), getNimbusSubject());
                 // if key already exists while creating the blob else update it
                 Iterator<String> keyIterator = blobStore.listKeys();
                 while (keyIterator.hasNext()) {

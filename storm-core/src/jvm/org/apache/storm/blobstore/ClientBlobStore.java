@@ -160,8 +160,8 @@ public abstract class ClientBlobStore implements Shutdownable {
      * @throws KeyAlreadyExistsException
      */
     public final AtomicOutputStream createBlob(String key, SettableBlobMeta meta) throws AuthorizationException, KeyAlreadyExistsException {
-        if (meta !=null && meta.is_set_acl()) {
-            BlobStoreAclHandler.validateSettableACLs(key, meta.get_acl());
+        if (meta !=null && meta.isSetAcl()) {
+            BlobStoreAclHandler.validateSettableACLs(key, meta.getAcl());
         }
         return createBlobToExtend(key, meta);
     }
@@ -174,8 +174,8 @@ public abstract class ClientBlobStore implements Shutdownable {
      * @throws KeyNotFoundException
      */
     public final void setBlobMeta(String key, SettableBlobMeta meta) throws AuthorizationException, KeyNotFoundException {
-        if (meta !=null && meta.is_set_acl()) {
-            BlobStoreAclHandler.validateSettableACLs(key, meta.get_acl());
+        if (meta !=null && meta.isSetAcl()) {
+            BlobStoreAclHandler.validateSettableACLs(key, meta.getAcl());
         }
         setBlobMetaToExtend(key, meta);
     }

@@ -245,7 +245,7 @@ public class BasicContainer extends Container {
 
         String workerPid = _ops.slurpString(new File(str)).trim();
 
-        ProfileAction profileAction = request.get_action();
+        ProfileAction profileAction = request.getAction();
         String logPrefix = "ProfilerAction process " + _topologyId + ":" + _port + " PROFILER_ACTION: " + profileAction
                 + " ";
 
@@ -436,10 +436,10 @@ public class BasicContainer extends Container {
      *            the command to run
      * @param env
      *            the environment to run the command
-     * @param processExitcallback
-     *            a callback for when the process exits
      * @param logPrefix
      *            the prefix to include in the logs
+     * @param processExitCallback
+     *            a callback for when the process exits
      * @param targetDir
      *            the working directory to run the command in
      * @return true if it ran successfully, else false
@@ -512,9 +512,9 @@ public class BasicContainer extends Container {
     
     private int getMemOnHeap(WorkerResources resources) {
         int memOnheap = 0;
-        if (resources != null && resources.is_set_mem_on_heap() && 
-                resources.get_mem_on_heap() > 0) {
-            memOnheap = (int) Math.ceil(resources.get_mem_on_heap());
+        if (resources != null && resources.isSetMem_on_heap() &&
+                resources.getMem_on_heap() > 0) {
+            memOnheap = (int) Math.ceil(resources.getMem_on_heap());
         } else {
             // set the default heap memory size for supervisor-test
             memOnheap = Utils.getInt(_topoConf.get(Config.WORKER_HEAP_MEMORY_MB), 768);
@@ -610,7 +610,7 @@ public class BasicContainer extends Container {
         ProcessExitCallback processExitCallback = new ProcessExitCallback(logPrefix);
         _exitedEarly = false;
         
-        final WorkerResources resources = _assignment.get_resources();
+        final WorkerResources resources = _assignment.getResources();
         final int memOnheap = getMemOnHeap(resources);
         final String stormRoot = ConfigUtils.supervisorStormDistRoot(_conf, _topologyId);
         final String jlp = javaLibraryPath(stormRoot, _conf);

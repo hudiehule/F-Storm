@@ -500,11 +500,11 @@ public class Utils {
 
     public static Object getSetComponentObject(ComponentObject obj) {
         if (obj.getSetField() == ComponentObject._Fields.SERIALIZED_JAVA) {
-            return Utils.javaDeserialize(obj.get_serialized_java(), Serializable.class);
+            return Utils.javaDeserialize(obj.getSerialized_java(), Serializable.class);
         } else if (obj.getSetField() == ComponentObject._Fields.JAVA_OBJECT) {
-            return obj.get_java_object();
+            return obj.getJava_object();
         } else {
-            return obj.get_shell();
+            return obj.getShell();
         }
     }
 
@@ -637,7 +637,7 @@ public class Utils {
     public static long nimbusVersionOfBlob(String key, ClientBlobStore cb) throws AuthorizationException, KeyNotFoundException {
         long nimbusBlobVersion = 0;
         ReadableBlobMeta metadata = cb.getBlobMeta(key);
-        nimbusBlobVersion = metadata.get_version();
+        nimbusBlobVersion = metadata.getVersion();
         return nimbusBlobVersion;
     }
 
@@ -710,14 +710,14 @@ public class Utils {
     }
 
     public static ComponentCommon getComponentCommon(StormTopology topology, String id) {
-        if (topology.get_spouts().containsKey(id)) {
-            return topology.get_spouts().get(id).get_common();
+        if (topology.getSpouts().containsKey(id)) {
+            return topology.getSpouts().get(id).getCommon();
         }
-        if (topology.get_bolts().containsKey(id)) {
-            return topology.get_bolts().get(id).get_common();
+        if (topology.getBolts().containsKey(id)) {
+            return topology.getBolts().get(id).getCommon();
         }
-        if (topology.get_state_spouts().containsKey(id)) {
-            return topology.get_state_spouts().get(id).get_common();
+        if (topology.getState_spouts().containsKey(id)) {
+            return topology.getState_spouts().get(id).getCommon();
         }
         throw new IllegalArgumentException("Could not find component with id " + id);
     }
@@ -1064,12 +1064,12 @@ public class Utils {
     }
 
     public static boolean canUserReadBlob(ReadableBlobMeta meta, String user) {
-        SettableBlobMeta settable = meta.get_settable();
-        for (AccessControl acl : settable.get_acl()) {
-            if (acl.get_type().equals(AccessControlType.OTHER) && (acl.get_access() & BlobStoreAclHandler.READ) > 0) {
+        SettableBlobMeta settable = meta.getSettable();
+        for (AccessControl acl : settable.getAcl()) {
+            if (acl.getType().equals(AccessControlType.OTHER) && (acl.getAccess() & BlobStoreAclHandler.READ) > 0) {
                 return true;
             }
-            if (acl.get_name().equals(user) && (acl.get_access() & BlobStoreAclHandler.READ) > 0) {
+            if (acl.getName().equals(user) && (acl.getAccess() & BlobStoreAclHandler.READ) > 0) {
                 return true;
             }
         }
@@ -1469,9 +1469,9 @@ public class Utils {
     public static String getTopologyId(String name, Nimbus.Client client) {
         try {
             ClusterSummary summary = client.getClusterInfo();
-            for(TopologySummary s : summary.get_topologies()) {
-                if(s.get_name().equals(name)) {
-                    return s.get_id();
+            for(TopologySummary s : summary.getTopologies()) {
+                if(s.getName().equals(name)) {
+                    return s.getId();
                 }
             }
         } catch(Exception e) {

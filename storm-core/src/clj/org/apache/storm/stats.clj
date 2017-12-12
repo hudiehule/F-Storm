@@ -242,30 +242,30 @@
   (GlobalStreamId. component stream))
 
 (defn from-global-stream-id [global-stream-id]
-  [(.get_componentId global-stream-id) (.get_streamId global-stream-id)])
+  [(.getComponentId global-stream-id) (.getStreamId global-stream-id)])
 
 (defmethod clojurify-specific-stats BoltStats [^BoltStats stats]
-  [(window-set-converter (.get_acked stats) from-global-stream-id identity)
-   (window-set-converter (.get_failed stats) from-global-stream-id identity)
-   (window-set-converter (.get_process_ms_avg stats) from-global-stream-id identity)
-   (window-set-converter (.get_executed stats) from-global-stream-id identity)
-   (window-set-converter (.get_execute_ms_avg stats) from-global-stream-id identity)])
+  [(window-set-converter (.getAcked stats) from-global-stream-id identity)
+   (window-set-converter (.getFailed stats) from-global-stream-id identity)
+   (window-set-converter (.getProcess_ms_avg stats) from-global-stream-id identity)
+   (window-set-converter (.getExecuted stats) from-global-stream-id identity)
+   (window-set-converter (.getExecute_ms_avg stats) from-global-stream-id identity)])
 
 (defmethod clojurify-specific-stats SpoutStats [^SpoutStats stats]
-  [(.get_acked stats)
-   (.get_failed stats)
-   (.get_complete_ms_avg stats)])
+  [(.getAcked stats)
+   (.getFailed stats)
+   (.getComplete_ms_avg stats)])
 
 
 (defn clojurify-executor-stats
   [^ExecutorStats stats]
-  (let [ specific-stats (.get_specific stats)
-         is_bolt? (.is_set_bolt specific-stats)
-         specific-stats (if is_bolt? (.get_bolt specific-stats) (.get_spout specific-stats))
+  (let [ specific-stats (.getSpecific stats)
+         is_bolt? (.isSetBolt specific-stats)
+         specific-stats (if is_bolt? (.getBolt specific-stats) (.getSpout specific-stats))
          specific-stats (clojurify-specific-stats specific-stats)
-         common-stats (CommonStats. (.get_emitted stats)
-                                    (.get_transferred stats)
-                                    (.get_rate stats))]
+         common-stats (CommonStats. (.getEmitted stats)
+                                    (.getTransferred stats)
+                                    (.getRate stats))]
     (if is_bolt?
       ; worker heart beat does not store the BoltExecutorStats or SpoutExecutorStats , instead it stores the result returned by render-stats!
       ; which flattens the BoltExecutorStats/SpoutExecutorStats by extracting values from all atoms and merging all values inside :common to top
@@ -816,8 +816,8 @@
   "Returns the component type (either :bolt or :spout) for a given
   topology and component id. Returns nil if not found."
   [^StormTopology topology id]
-  (let [bolts (.get_bolts topology)
-        spouts (.get_spouts topology)]
+  (let [bolts (.getBolts topology)
+        spouts (.getSpouts topology)]
     (cond
       (Utils/isSystemId id) :bolt
       (.containsKey bolts id) :bolt
@@ -929,13 +929,13 @@
            failed
            num-executors] :as statk->num}]
   (let [cas (CommonAggregateStats.)]
-    (and num-executors (.set_num_executors cas num-executors))
-    (and num-tasks (.set_num_tasks cas num-tasks))
-    (and emitted (.set_emitted cas emitted))
-    (and transferred (.set_transferred cas transferred))
-    (and acked (.set_acked cas acked))
-    (and failed (.set_failed cas failed))
-    (.set_common_stats s cas)))
+    (and num-executors (.setNum_executors cas num-executors))
+    (and num-tasks (.setNum_tasks cas num-tasks))
+    (and emitted (.setEmitted cas emitted))
+    (and transferred (.setTransferred cas transferred))
+    (and acked (.setAcked cas acked))
+    (and failed (.setFailed cas failed))
+    (.setCommon_stats s cas)))
 
 (defn thriftify-bolt-agg-stats
   [statk->num]
@@ -945,16 +945,16 @@
                 executed
                 capacity]} statk->num
         s (ComponentAggregateStats.)]
-    (.set_type s ComponentType/BOLT)
-    (and lastError (.set_last_error s lastError))
+    (.setType s ComponentType/BOLT)
+    (and lastError (.setLast_error s lastError))
     (thriftify-common-agg-stats s statk->num)
-    (.set_specific_stats s
+    (.setSpecific_stats s
       (SpecificAggregateStats/bolt
         (let [bas (BoltAggregateStats.)]
-          (and execute-latency (.set_execute_latency_ms bas execute-latency))
-          (and process-latency (.set_process_latency_ms bas process-latency))
-          (and executed (.set_executed bas executed))
-          (and capacity (.set_capacity bas capacity))
+          (and execute-latency (.setExecute_latency_ms bas execute-latency))
+          (and process-latency (.setProcess_latency_ms bas process-latency))
+          (and executed (.setExecuted bas executed))
+          (and capacity (.setCapacity bas capacity))
           bas)))
     s))
 
@@ -963,13 +963,13 @@
   (let [{:keys [lastError
                 complete-latency]} statk->num
         s (ComponentAggregateStats.)]
-    (.set_type s ComponentType/SPOUT)
-    (and lastError (.set_last_error s lastError))
+    (.setType s ComponentType/SPOUT)
+    (and lastError (.setLast_error s lastError))
     (thriftify-common-agg-stats s statk->num)
-    (.set_specific_stats s
+    (.setSpecific_stats s
       (SpecificAggregateStats/spout
         (let [sas (SpoutAggregateStats.)]
-          (and complete-latency (.set_complete_latency_ms sas complete-latency))
+          (and complete-latency (.setComplete_latency_ms sas complete-latency))
           sas)))
     s))
 
@@ -996,19 +996,19 @@
                               [id
                                (thriftify-bolt-agg-stats m)]))
         topology-stats (doto (TopologyStats.)
-                         (.set_window_to_emitted window->emitted)
-                         (.set_window_to_transferred window->transferred)
-                         (.set_window_to_complete_latencies_ms
+                         (.setWindow_to_emitted window->emitted)
+                         (.setWindow_to_transferred window->transferred)
+                         (.setWindow_to_complete_latencies_ms
                            window->complete-latency)
-                         (.set_window_to_acked window->acked)
-                         (.set_window_to_failed window->failed))
+                         (.setWindow_to_acked window->acked)
+                         (.setWindow_to_failed window->failed))
       topo-page-info (doto (TopologyPageInfo. topology-id)
-                       (.set_num_tasks num-tasks)
-                       (.set_num_workers num-workers)
-                       (.set_num_executors num-executors)
-                       (.set_id_to_spout_agg_stats spout-agg-stats)
-                       (.set_id_to_bolt_agg_stats bolt-agg-stats)
-                       (.set_topology_stats topology-stats))]
+                       (.setNum_tasks num-tasks)
+                       (.setNum_workers num-workers)
+                       (.setNum_executors num-executors)
+                       (.setId_to_spout_agg_stats spout-agg-stats)
+                       (.setId_to_bolt_agg_stats bolt-agg-stats)
+                       (.setTopology_stats topology-stats))]
     topo-page-info))
 
 (defn agg-topo-execs-stats
@@ -1235,13 +1235,13 @@
 (defn thriftify-exec-agg-stats
   [comp-id comp-type {:keys [executor-id host port uptime] :as stats}]
   (doto (ExecutorAggregateStats.)
-    (.set_exec_summary (ExecutorSummary. (apply #(ExecutorInfo. %1 %2)
+    (.setExec_summary (ExecutorSummary. (apply #(ExecutorInfo. %1 %2)
                                                 executor-id)
                                          comp-id
                                          host
                                          port
                                          (or uptime 0)))
-    (.set_stats ((condp = comp-type
+    (.setStats ((condp = comp-type
                    :bolt thriftify-bolt-agg-stats
                    :spout thriftify-spout-agg-stats) stats))))
 
@@ -1293,15 +1293,15 @@
         num-executors (:num-executors data)
         num-tasks (:num-tasks data)
         ret (doto (ComponentPageInfo. comp-id compType)
-              (.set_topology_id topo-id)
-              (.set_topology_name nil)
-              (.set_window_to_stats w->stats)
-              (.set_sid_to_output_stats sid->output-stats)
-              (.set_exec_stats exec-stats))]
-    (and num-executors (.set_num_executors ret num-executors))
-    (and num-tasks (.set_num_tasks ret num-tasks))
+              (.setTopology_id topo-id)
+              (.setTopology_name nil)
+              (.setWindow_to_stats w->stats)
+              (.setSid_to_output_stats sid->output-stats)
+              (.setExec_stats exec-stats))]
+    (and num-executors (.setNum_executors ret num-executors))
+    (and num-tasks (.setNum_tasks ret num-tasks))
     (and gsid->input-stats
-         (.set_gsid_to_input_stats ret gsid->input-stats))
+         (.setGsid_to_input_stats ret gsid->input-stats))
     ret))
 
 (defn agg-comp-execs-stats
@@ -1388,31 +1388,31 @@
 
 (defn aggregate-common-stats
   [stats-seq]
-  {:emitted (aggregate-counts (map #(.get_emitted ^ExecutorStats %) stats-seq))
-   :transferred (aggregate-counts (map #(.get_transferred ^ExecutorStats %) stats-seq))})
+  {:emitted (aggregate-counts (map #(.getEmitted ^ExecutorStats %) stats-seq))
+   :transferred (aggregate-counts (map #(.getTransferred ^ExecutorStats %) stats-seq))})
 
 (defn aggregate-bolt-stats
   [stats-seq include-sys?]
   (let [stats-seq (collectify stats-seq)]
     (merge (pre-process (aggregate-common-stats stats-seq) include-sys?)
            {:acked
-            (aggregate-counts (map #(.. ^ExecutorStats % get_specific get_bolt get_acked)
+            (aggregate-counts (map #(.. ^ExecutorStats % getSpecific getBolt getAcked)
                                    stats-seq))
             :failed
-            (aggregate-counts (map #(.. ^ExecutorStats % get_specific get_bolt get_failed)
+            (aggregate-counts (map #(.. ^ExecutorStats % getSpecific getBolt getFailed)
                                    stats-seq))
             :executed
-            (aggregate-counts (map #(.. ^ExecutorStats % get_specific get_bolt get_executed)
+            (aggregate-counts (map #(.. ^ExecutorStats % getSpecific getBolt getExecuted)
                                    stats-seq))
             :process-latencies
-            (aggregate-averages (map #(.. ^ExecutorStats % get_specific get_bolt get_process_ms_avg)
+            (aggregate-averages (map #(.. ^ExecutorStats % getSpecific getBolt getProcess_ms_avg)
                                      stats-seq)
-                                (map #(.. ^ExecutorStats % get_specific get_bolt get_acked)
+                                (map #(.. ^ExecutorStats % getSpecific getBolt getAcked)
                                      stats-seq))
             :execute-latencies
-            (aggregate-averages (map #(.. ^ExecutorStats % get_specific get_bolt get_execute_ms_avg)
+            (aggregate-averages (map #(.. ^ExecutorStats % getSpecific getBolt getExecute_ms_avg)
                                      stats-seq)
-                                (map #(.. ^ExecutorStats % get_specific get_bolt get_executed)
+                                (map #(.. ^ExecutorStats % getSpecific getBolt getExecuted)
                                      stats-seq))})))
 
 (defn aggregate-spout-stats
@@ -1420,21 +1420,21 @@
   (let [stats-seq (collectify stats-seq)]
     (merge (pre-process (aggregate-common-stats stats-seq) include-sys?)
            {:acked
-            (aggregate-counts (map #(.. ^ExecutorStats % get_specific get_spout get_acked)
+            (aggregate-counts (map #(.. ^ExecutorStats % getSpecific getSpout getAcked)
                                    stats-seq))
             :failed
-            (aggregate-counts (map #(.. ^ExecutorStats % get_specific get_spout get_failed)
+            (aggregate-counts (map #(.. ^ExecutorStats % getSpecific getSpout getFailed)
                                    stats-seq))
             :complete-latencies
-            (aggregate-averages (map #(.. ^ExecutorStats % get_specific get_spout get_complete_ms_avg)
+            (aggregate-averages (map #(.. ^ExecutorStats % getSpecific getSpout getComplete_ms_avg)
                                      stats-seq)
-                                (map #(.. ^ExecutorStats % get_specific get_spout get_acked)
+                                (map #(.. ^ExecutorStats % getSpecific getSpout getAcked)
                                      stats-seq))})))
 
 (defn get-filled-stats
   [summs]
   (->> summs
-       (map #(.get_stats ^ExecutorSummary %))
+       (map #(.getStats ^ExecutorSummary %))
        (filter not-nil?)))
 
 (defn aggregate-spout-streams
@@ -1467,14 +1467,14 @@
 
 (defn compute-executor-capacity
   [^ExecutorSummary e]
-  (let [stats (.get_stats e)
+  (let [stats (.getStats e)
         stats (if stats
                 (-> stats
                     (aggregate-bolt-stats true)
                     (aggregate-bolt-streams)
                     swap-map-order
                     (get (str TEN-MIN-IN-SECONDS))))
-        uptime (nil-to-zero (.get_uptime_secs e))
+        uptime (nil-to-zero (.getUptime_secs e))
         window (if (< uptime TEN-MIN-IN-SECONDS) uptime TEN-MIN-IN-SECONDS)
         executed (-> stats :executed nil-to-zero)
         latency (-> stats :execute-latencies nil-to-zero)]
@@ -1516,11 +1516,11 @@
 (defn most-recent-error
   [errors-list]
   (let [error (->> errors-list
-                   (sort-by #(.get_error_time_secs ^ErrorInfo %))
+                   (sort-by #(.getError_time_secs ^ErrorInfo %))
                    reverse
                    first)]
     (if error
-      (error-subset (.get_error ^ErrorInfo error))
+      (error-subset (.getError ^ErrorInfo error))
       "")))
 
 (defn float-str [n]
