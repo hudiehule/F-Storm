@@ -1,8 +1,12 @@
 package org.apache.storm.accelerator;
 
+import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.IRichBolt;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.generated.AccType;
+import org.apache.storm.tuple.Tuple;
+
+import java.util.Map;
 
 
 /**
@@ -30,12 +34,25 @@ public abstract class BaseAcceleratorBolt implements IRichBolt{
           this.kernelName = kernelName;
     }
 
+    public void prepare(Map stormConf, TopologyContext topologyContext) {
 
-    @Override
-    public void declareOutputFields(OutputFieldsDeclarer declarer){
+
+    }
+    public void execute(Tuple tuple){
 
     }
 
+ /*   @Override
+    public void declareOutputFields(OutputFieldsDeclarer declarer){
+
+    }*/
+
+    /**
+     * function defined by user,
+     * @param stormConf
+     * @param topologyContext
+     */
+   public abstract void userPrepare(Map stormConf, TopologyContext topologyContext);
 
 
 }
