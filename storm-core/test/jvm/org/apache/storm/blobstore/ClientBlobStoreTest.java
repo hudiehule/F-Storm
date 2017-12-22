@@ -62,7 +62,7 @@ public class ClientBlobStoreTest {
       ReadableBlobMeta reableMeta = null;
       if (allBlobs.containsKey(key)) {
         reableMeta = new ReadableBlobMeta();
-        reableMeta.set_settable(allBlobs.get(key));
+        reableMeta.setSettable(allBlobs.get(key));
       }
       return reableMeta;
     }
@@ -127,9 +127,9 @@ public class ClientBlobStoreTest {
   public void testDuplicateACLsForCreate() throws Exception {
     SettableBlobMeta meta = new SettableBlobMeta();
     AccessControl submitterAcl = BlobStoreAclHandler.parseAccessControl("u:tester:rwa");
-    meta.add_to_acl(submitterAcl);
+    meta.addToAcl(submitterAcl);
     AccessControl duplicateAcl = BlobStoreAclHandler.parseAccessControl("u:tester:r--");
-    meta.add_to_acl(duplicateAcl);
+    meta.addToAcl(duplicateAcl);
     String testKey = "testDuplicateACLsBlobKey";
     client.createBlob(testKey, meta);
   }
@@ -138,7 +138,7 @@ public class ClientBlobStoreTest {
   public void testGoodACLsForCreate() throws Exception {
     SettableBlobMeta meta = new SettableBlobMeta();
     AccessControl submitterAcl = BlobStoreAclHandler.parseAccessControl("u:tester:rwa");
-    meta.add_to_acl(submitterAcl);
+    meta.addToAcl(submitterAcl);
     String testKey = "testBlobKey";
     client.createBlob(testKey, meta);
     validatedBlobAcls(testKey);
@@ -150,7 +150,7 @@ public class ClientBlobStoreTest {
     SettableBlobMeta meta = new SettableBlobMeta();
     createTestBlob(testKey, meta);
     AccessControl duplicateAcl = BlobStoreAclHandler.parseAccessControl("u:tester:r--");
-    meta.add_to_acl(duplicateAcl);
+    meta.addToAcl(duplicateAcl);
     client.setBlobMeta(testKey, meta);
   }
 
@@ -159,21 +159,21 @@ public class ClientBlobStoreTest {
     String testKey = "testBlobKey";
     SettableBlobMeta meta = new SettableBlobMeta();
     createTestBlob(testKey, meta);
-    meta.add_to_acl(BlobStoreAclHandler.parseAccessControl("u:nextuser:r--"));
+    meta.addToAcl(BlobStoreAclHandler.parseAccessControl("u:nextuser:r--"));
     client.setBlobMeta(testKey,meta);
     validatedBlobAcls(testKey);
   }
 
   private void createTestBlob(String testKey, SettableBlobMeta meta) throws AuthorizationException, KeyAlreadyExistsException {
     AccessControl submitterAcl = BlobStoreAclHandler.parseAccessControl("u:tester:rwa");
-    meta.add_to_acl(submitterAcl);
+    meta.addToAcl(submitterAcl);
     client.createBlob(testKey, meta);
   }
 
   private void validatedBlobAcls(String testKey) throws KeyNotFoundException, AuthorizationException {
     ReadableBlobMeta blobMeta = client.getBlobMeta(testKey);
     Assert.assertNotNull("The blob" + testKey + "does not have any readable blobMeta.", blobMeta);
-    SettableBlobMeta settableBlob = blobMeta.get_settable();
+    SettableBlobMeta settableBlob = blobMeta.getSettable();
     Assert.assertNotNull("The blob" + testKey + "does not have any settable blobMeta.", settableBlob);
   }
 }

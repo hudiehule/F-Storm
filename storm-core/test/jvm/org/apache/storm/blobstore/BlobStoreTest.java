@@ -361,7 +361,7 @@ public class BlobStoreTest {
       // Testing whether acls are set to WORLD_EVERYTHING, Here we are testing only for LocalFsBlobstore
       // as the HdfsBlobstore gets the subject information of the local system user and behaves as it is
       // always authenticated.
-      assertTrue("ACL does not contain WORLD_EVERYTHING", metadata.get_acl().toString().contains("OTHER"));
+      assertTrue("ACL does not contain WORLD_EVERYTHING", metadata.getAcl().toString().contains("OTHER"));
 
       LOG.info("Deleting test-empty-acls");
       store.deleteBlob("test-empty-acls", null);

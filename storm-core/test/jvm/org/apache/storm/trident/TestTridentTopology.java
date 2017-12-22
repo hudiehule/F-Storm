@@ -64,7 +64,7 @@ public class TestTridentTopology {
         Set<String> pre = null;
         for (int i = 0; i < 100; i++) {
             StormTopology topology = buildTopology();
-            Map<String, Bolt> cur = topology.get_bolts();
+            Map<String, Bolt> cur = topology.getBolts();
             System.out.println(cur.keySet());
             if (pre != null) {
                 Assert.assertTrue("bold id not consistent with group name", pre.equals(cur.keySet()));

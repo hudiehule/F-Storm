@@ -110,7 +110,7 @@ public class TestUtilsForResourceAwareScheduler {
         Map<ExecutorDetails, String> retMap = new HashMap<ExecutorDetails, String>();
         int startTask = 0;
         int endTask = 1;
-        for (Map.Entry<String, SpoutSpec> entry : topology.get_spouts().entrySet()) {
+        for (Map.Entry<String, SpoutSpec> entry : topology.getSpouts().entrySet()) {
             for (int i = 0; i < spoutParallelism; i++) {
                 retMap.put(new ExecutorDetails(startTask, endTask), entry.getKey());
                 startTask++;
@@ -118,7 +118,7 @@ public class TestUtilsForResourceAwareScheduler {
             }
         }
 
-        for (Map.Entry<String, Bolt> entry : topology.get_bolts().entrySet()) {
+        for (Map.Entry<String, Bolt> entry : topology.getBolts().entrySet()) {
             for (int i = 0; i < boltParallelism; i++) {
                 retMap.put(new ExecutorDetails(startTask, endTask), entry.getKey());
                 startTask++;

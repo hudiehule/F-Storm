@@ -51,11 +51,11 @@ public class AsyncLocalizerTest {
     public void testRequestDownloadBaseTopologyBlobs() throws Exception {
         final String topoId = "TOPO";
         LocalAssignment la = new LocalAssignment();
-        la.set_topology_id(topoId);
+        la.setTopology_id(topoId);
         ExecutorInfo ei = new ExecutorInfo();
-        ei.set_task_start(1);
-        ei.set_task_end(1);
-        la.add_to_executors(ei);
+        ei.setTask_start(1);
+        ei.setTask_end(1);
+        la.addToExecutors(ei);
         final int port = 8080;
         final String jarKey = topoId + "-stormjar.jar";
         final String codeKey = topoId + "-stormcode.ser";
@@ -111,11 +111,11 @@ public class AsyncLocalizerTest {
     public void testRequestDownloadTopologyBlobs() throws Exception {
         final String topoId = "TOPO-12345";
         LocalAssignment la = new LocalAssignment();
-        la.set_topology_id(topoId);
+        la.setTopology_id(topoId);
         ExecutorInfo ei = new ExecutorInfo();
-        ei.set_task_start(1);
-        ei.set_task_end(1);
-        la.add_to_executors(ei);
+        ei.setTask_start(1);
+        ei.setTask_end(1);
+        la.addToExecutors(ei);
         final String topoName = "TOPO";
         final int port = 8080;
         final String user = "user";
@@ -131,9 +131,9 @@ public class AsyncLocalizerTest {
         final String simpleCurrentLocalFile = localizerRoot + user + "/simple.current";
        
         final StormTopology st = new StormTopology();
-        st.set_spouts(new HashMap<String, SpoutSpec>());
-        st.set_bolts(new HashMap<String, Bolt>());
-        st.set_state_spouts(new HashMap<String, StateSpoutSpec>());
+        st.setSpouts(new HashMap<String, SpoutSpec>());
+        st.setBolts(new HashMap<String, Bolt>());
+        st.setState_spouts(new HashMap<String, StateSpoutSpec>());
  
         Map<String, Map<String, Object>> topoBlobMap = new HashMap<>();
         Map<String, Object> simple = new HashMap<>();

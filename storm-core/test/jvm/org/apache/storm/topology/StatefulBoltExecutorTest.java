@@ -59,7 +59,7 @@ public class StatefulBoltExecutorTest {
         mockBolt = Mockito.mock(IStatefulBolt.class);
         executor = new StatefulBoltExecutor<>(mockBolt);
         GlobalStreamId mockGlobalStreamId = Mockito.mock(GlobalStreamId.class);
-        Mockito.when(mockGlobalStreamId.get_streamId()).thenReturn(CheckpointSpout.CHECKPOINT_STREAM_ID);
+        Mockito.when(mockGlobalStreamId.getStreamId()).thenReturn(CheckpointSpout.CHECKPOINT_STREAM_ID);
         mockStreamIds = new HashSet<>();
         mockStreamIds.add(mockGlobalStreamId);
         mockTopologyContext = Mockito.mock(TopologyContext.class);

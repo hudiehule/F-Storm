@@ -99,7 +99,7 @@ public class ContainerTest {
         AdvancedFSOps ops = mock(AdvancedFSOps.class);
         when(ops.doRequiredTopoFilesExist(superConf, topoId)).thenReturn(true);
         LocalAssignment la = new LocalAssignment();
-        la.set_topology_id(topoId);
+        la.setTopology_id(topoId);
         MockContainer mc = new MockContainer(ContainerType.LAUNCH, superConf, 
                 "SUPERVISOR", 8080, la, "worker", new HashMap<String, Object>(), ops);
         mc.kill();
@@ -180,7 +180,7 @@ public class ContainerTest {
         when(ops.getWriter(logMetadataFile)).thenReturn(yamlDump);
         
         LocalAssignment la = new LocalAssignment();
-        la.set_topology_id(topoId);
+        la.setTopology_id(topoId);
         MockContainer mc = new MockContainer(ContainerType.LAUNCH, superConf, 
                 "SUPERVISOR", 8080, la, workerId, topoConf, ops);
         
@@ -248,7 +248,7 @@ public class ContainerTest {
         when(ops.getWriter(logMetadataFile)).thenReturn(yamlDump);
         
         LocalAssignment la = new LocalAssignment();
-        la.set_topology_id(topoId);
+        la.setTopology_id(topoId);
         MockContainer mc = new MockContainer(ContainerType.LAUNCH, superConf, 
                 "SUPERVISOR", port, la, workerId, topoConf, ops);
         mc.allPids.add(pid);

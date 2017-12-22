@@ -275,7 +275,7 @@ public class LocalizerTest {
     localizer.setTargetCacheSize(1);
 
     ReadableBlobMeta rbm = new ReadableBlobMeta();
-    rbm.set_settable(new SettableBlobMeta(BlobStoreAclHandler.WORLD_EVERYTHING));
+    rbm.setSettable(new SettableBlobMeta(BlobStoreAclHandler.WORLD_EVERYTHING));
     when(mockblobstore.getBlobMeta(key1)).thenReturn(rbm);
 
     when(mockblobstore.getBlob(key1)).thenReturn(new TestInputStreamWithMeta(new
@@ -352,7 +352,7 @@ public class LocalizerTest {
     localizer.setTargetCacheSize(1);
 
     ReadableBlobMeta rbm = new ReadableBlobMeta();
-    rbm.set_settable(new SettableBlobMeta(BlobStoreAclHandler.WORLD_EVERYTHING));
+    rbm.setSettable(new SettableBlobMeta(BlobStoreAclHandler.WORLD_EVERYTHING));
     when(mockblobstore.getBlobMeta(key1)).thenReturn(rbm);
 
     when(mockblobstore.getBlob(key1)).thenReturn(new TestInputStreamWithMeta());
@@ -421,7 +421,7 @@ public class LocalizerTest {
     localizer.setTargetCacheSize(68);
 
     ReadableBlobMeta rbm = new ReadableBlobMeta();
-    rbm.set_settable(new SettableBlobMeta(BlobStoreAclHandler.WORLD_EVERYTHING));
+    rbm.setSettable(new SettableBlobMeta(BlobStoreAclHandler.WORLD_EVERYTHING));
     when(mockblobstore.getBlobMeta(anyString())).thenReturn(rbm);
     when(mockblobstore.getBlob(key1)).thenReturn(new TestInputStreamWithMeta());
     when(mockblobstore.getBlob(key2)).thenReturn(new TestInputStreamWithMeta());
@@ -508,8 +508,8 @@ public class LocalizerTest {
     ReadableBlobMeta rbm = new ReadableBlobMeta();
     // set acl so user doesn't have read access
     AccessControl acl = new AccessControl(AccessControlType.USER, BlobStoreAclHandler.ADMIN);
-    acl.set_name(user1);
-    rbm.set_settable(new SettableBlobMeta(Arrays.asList(acl)));
+    acl.setName(user1);
+    rbm.setSettable(new SettableBlobMeta(Arrays.asList(acl)));
     when(mockblobstore.getBlobMeta(anyString())).thenReturn(rbm);
     when(mockblobstore.getBlob(key1)).thenReturn(new TestInputStreamWithMeta());
     File user1Dir = localizer.getLocalUserFileCacheDir(user1);
@@ -549,7 +549,7 @@ public class LocalizerTest {
     localizer.setTargetCacheSize(68);
 
     ReadableBlobMeta rbm = new ReadableBlobMeta();
-    rbm.set_settable(new SettableBlobMeta(BlobStoreAclHandler.WORLD_EVERYTHING));
+    rbm.setSettable(new SettableBlobMeta(BlobStoreAclHandler.WORLD_EVERYTHING));
     when(mockblobstore.getBlobMeta(anyString())).thenReturn(rbm);
     when(mockblobstore.getBlob(key1)).thenReturn(new TestInputStreamWithMeta());
     when(mockblobstore.getBlob(key2)).thenReturn(new TestInputStreamWithMeta());
@@ -628,8 +628,8 @@ public class LocalizerTest {
     Localizer localizer = new TestLocalizer(conf, baseDir.toString());
 
     ReadableBlobMeta rbm = new ReadableBlobMeta();
-    rbm.set_version(1);
-    rbm.set_settable(new SettableBlobMeta(BlobStoreAclHandler.WORLD_EVERYTHING));
+    rbm.setVersion(1);
+    rbm.setSettable(new SettableBlobMeta(BlobStoreAclHandler.WORLD_EVERYTHING));
     when(mockblobstore.getBlobMeta(key1)).thenReturn(rbm);
     when(mockblobstore.getBlob(key1)).thenReturn(new TestInputStreamWithMeta());
 
@@ -652,7 +652,7 @@ public class LocalizerTest {
     assertEquals("local resource set size wrong", 1, lrsrcSet.getSize());
 
     // test another topology getting blob with updated version - it should update version now
-    rbm.set_version(2);
+    rbm.setVersion(2);
 
     localizer.getBlob(new LocalResource(key1, false), user1, topo2, user1Dir);
     assertTrue("blob version file not created", versionFile.exists());
@@ -660,7 +660,7 @@ public class LocalizerTest {
     assertTrue("blob file with version 2 not created", new File(keyFile + ".2").exists());
 
     // now test regular updateBlob
-    rbm.set_version(3);
+    rbm.setVersion(3);
 
     ArrayList<LocalResource> arr = new ArrayList<LocalResource>();
     arr.add(new LocalResource(key1, false));

@@ -75,23 +75,23 @@ public class TopologyBuilderTest {
         StormTopology topology = builder.createTopology();
 
         Assert.assertNotNull(topology);
-        Set<String> spouts = topology.get_spouts().keySet();
+        Set<String> spouts = topology.getSpouts().keySet();
         // checkpoint spout should 've been added
         Assert.assertEquals(ImmutableSet.of("spout1", "spout2", "$checkpointspout"), spouts);
         // bolt1, bolt2 should also receive from checkpoint spout
         Assert.assertEquals(ImmutableSet.of(new GlobalStreamId("spout1", "default"),
                                             new GlobalStreamId("spout2", "default"),
                                             new GlobalStreamId("$checkpointspout", "$checkpoint")),
-                            topology.get_bolts().get("bolt1").get_common().get_inputs().keySet());
+                            topology.getBolts().get("bolt1").getCommon().getInputs().keySet());
         Assert.assertEquals(ImmutableSet.of(new GlobalStreamId("spout1", "default"),
                                             new GlobalStreamId("$checkpointspout", "$checkpoint")),
-                            topology.get_bolts().get("bolt2").get_common().get_inputs().keySet());
+                            topology.getBolts().get("bolt2").getCommon().getInputs().keySet());
         // bolt3 should also receive from checkpoint streams of bolt1, bolt2
         Assert.assertEquals(ImmutableSet.of(new GlobalStreamId("bolt1", "default"),
                                             new GlobalStreamId("bolt1", "$checkpoint"),
                                             new GlobalStreamId("bolt2", "default"),
                                             new GlobalStreamId("bolt2", "$checkpoint")),
-                            topology.get_bolts().get("bolt3").get_common().get_inputs().keySet());
+                            topology.getBolts().get("bolt3").getCommon().getInputs().keySet());
     }
 
     private IRichSpout makeDummySpout() {

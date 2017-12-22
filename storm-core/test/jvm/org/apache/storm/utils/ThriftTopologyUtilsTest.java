@@ -63,7 +63,7 @@ public class ThriftTopologyUtilsTest extends TestCase {
         ComponentCommon componentCommon = ThriftTopologyUtils.getComponentCommon(stormTopology, "bolt-1");
         Assert.assertEquals(
                 "We expect to get bolt-1's common",
-                new Bolt().get_common(),
+                new Bolt().getCommon(),
                 componentCommon);
     }
 
@@ -73,7 +73,7 @@ public class ThriftTopologyUtilsTest extends TestCase {
         ComponentCommon componentCommon = ThriftTopologyUtils.getComponentCommon(stormTopology, "bolt-1");
         Assert.assertEquals(
                 "We expect to get bolt-1's common",
-                new Bolt().get_common(),
+                new Bolt().getCommon(),
                 componentCommon);
     }
 
@@ -82,11 +82,11 @@ public class ThriftTopologyUtilsTest extends TestCase {
         ImmutableMap<String,Bolt> bolts = ImmutableMap.of("bolt-1", new Bolt());
         ImmutableMap<String,StateSpoutSpec> state_spouts = ImmutableMap.of();
 
-        StormTopology stormTopology = new StormTopology(spouts, bolts, state_spouts);
+        StormTopology stormTopology = new StormTopology(spouts, bolts,null, state_spouts);
 
         if(withWorkerHook) {
             BaseWorkerHook workerHook = new BaseWorkerHook();
-            stormTopology.add_to_worker_hooks(ByteBuffer.wrap(Utils.javaSerialize(workerHook)));
+            stormTopology.addToWorker_hooks(ByteBuffer.wrap(Utils.javaSerialize(workerHook)));
         }
 
         return stormTopology;

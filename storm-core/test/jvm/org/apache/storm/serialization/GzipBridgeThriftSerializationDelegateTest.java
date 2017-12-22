@@ -41,8 +41,8 @@ public class GzipBridgeThriftSerializationDelegateTest {
 
         GlobalStreamId id2 = testDelegate.deserialize(serialized, GlobalStreamId.class);
 
-        assertEquals(id2.get_componentId(), id.get_componentId());
-        assertEquals(id2.get_streamId(), id.get_streamId());
+        assertEquals(id2.getComponentId(), id.getComponentId());
+        assertEquals(id2.getStreamId(), id.getStreamId());
     }
 
     @Test
@@ -53,8 +53,8 @@ public class GzipBridgeThriftSerializationDelegateTest {
 
         GlobalStreamId id2 = testDelegate.deserialize(serialized, GlobalStreamId.class);
 
-        assertEquals(id2.get_componentId(), id.get_componentId());
-        assertEquals(id2.get_streamId(), id.get_streamId());
+        assertEquals(id2.getComponentId(), id.getComponentId());
+        assertEquals(id2.getStreamId(), id.getStreamId());
     }
 
     @Test
@@ -65,7 +65,7 @@ public class GzipBridgeThriftSerializationDelegateTest {
 
         GlobalStreamId id2 = testDelegate.deserialize(serialized, GlobalStreamId.class);
 
-        assertEquals(id2.get_componentId(), id.get_componentId());
-        assertEquals(id2.get_streamId(), id.get_streamId());
+        assertEquals(id2.getComponentId(), id.getComponentId());
+        assertEquals(id2.getStreamId(), id.getStreamId());
     }
 }

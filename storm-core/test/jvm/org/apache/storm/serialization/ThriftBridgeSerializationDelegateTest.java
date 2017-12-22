@@ -39,10 +39,10 @@ public class ThriftBridgeSerializationDelegateTest {
     @Test
     public void testThriftInstance() throws Exception {
         ErrorInfo errorInfo = new ErrorInfo();
-        errorInfo.set_error("error");
-        errorInfo.set_error_time_secs(1);
-        errorInfo.set_host("host");
-        errorInfo.set_port(1);
+        errorInfo.setError("error");
+        errorInfo.setError_time_secs(1);
+        errorInfo.setHost("host");
+        errorInfo.setPort(1);
 
         byte[] serialized = new ThriftSerializationDelegate().serialize(errorInfo);
         ErrorInfo errorInfo2 = testDelegate.deserialize(serialized, ErrorInfo.class);

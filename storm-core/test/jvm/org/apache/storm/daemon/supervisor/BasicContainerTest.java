@@ -120,7 +120,7 @@ public class BasicContainerTest {
         final String topoId = "test_topology";
         final int port = 8080;
         LocalAssignment la = new LocalAssignment();
-        la.set_topology_id(topoId);
+        la.setTopology_id(topoId);
         
         Map<String, Object> superConf = new HashMap<>();
         AdvancedFSOps ops = mock(AdvancedFSOps.class);
@@ -145,7 +145,7 @@ public class BasicContainerTest {
         final String workerId = "myWorker";
         final int port = 8080;
         LocalAssignment la = new LocalAssignment();
-        la.set_topology_id(topoId);
+        la.setTopology_id(topoId);
         
         Map<String, Integer> workerState = new HashMap<String, Integer>();
         workerState.put(workerId, port);
@@ -168,7 +168,7 @@ public class BasicContainerTest {
         final String topoId = "test_topology";
         final int port = 8080;
         LocalAssignment la = new LocalAssignment();
-        la.set_topology_id(topoId);
+        la.setTopology_id(topoId);
         
         Map<String, Integer> workerState = new HashMap<String, Integer>();
         workerState.put("somethingelse", port+1);
@@ -191,7 +191,7 @@ public class BasicContainerTest {
         final int port = 8080;
         final String workerId = "worker-id";
         LocalAssignment la = new LocalAssignment();
-        la.set_topology_id(topoId);
+        la.setTopology_id(topoId);
         
         Map<String, Object> superConf = new HashMap<>();
         AdvancedFSOps ops = mock(AdvancedFSOps.class);
@@ -229,7 +229,7 @@ public class BasicContainerTest {
         superConf.put(Config.STORM_WORKERS_ARTIFACTS_DIR, stormLocal);
         
         LocalAssignment la = new LocalAssignment();
-        la.set_topology_id(topoId);
+        la.setTopology_id(topoId);
         
         AdvancedFSOps ops = mock(AdvancedFSOps.class);
         when(ops.doRequiredTopoFilesExist(superConf, topoId)).thenReturn(true);
@@ -242,7 +242,7 @@ public class BasicContainerTest {
         
         //HEAP DUMP
         ProfileRequest req = new ProfileRequest();
-        req.set_action(ProfileAction.JMAP_DUMP);
+        req.setAction(ProfileAction.JMAP_DUMP);
         
         mc.runProfiling(req, false);
         
@@ -253,7 +253,7 @@ public class BasicContainerTest {
         assertEquals(new File(topoRoot), cmd.pwd);
         
         //JSTACK DUMP
-        req.set_action(ProfileAction.JSTACK_DUMP);
+        req.setAction(ProfileAction.JSTACK_DUMP);
         
         mc.runProfiling(req, false);
         
@@ -264,7 +264,7 @@ public class BasicContainerTest {
         assertEquals(new File(topoRoot), cmd.pwd);
         
         //RESTART
-        req.set_action(ProfileAction.JVM_RESTART);
+        req.setAction(ProfileAction.JVM_RESTART);
         
         mc.runProfiling(req, false);
         
@@ -275,7 +275,7 @@ public class BasicContainerTest {
         assertEquals(new File(topoRoot), cmd.pwd);
         
         //JPROFILE DUMP
-        req.set_action(ProfileAction.JPROFILE_DUMP);
+        req.setAction(ProfileAction.JPROFILE_DUMP);
         
         mc.runProfiling(req, false);
         
@@ -286,7 +286,7 @@ public class BasicContainerTest {
         assertEquals(new File(topoRoot), cmd.pwd);
         
         //JPROFILE START
-        req.set_action(ProfileAction.JPROFILE_STOP);
+        req.setAction(ProfileAction.JPROFILE_STOP);
         
         mc.runProfiling(req, false);
         
@@ -297,7 +297,7 @@ public class BasicContainerTest {
         assertEquals(new File(topoRoot), cmd.pwd);
         
         //JPROFILE STOP
-        req.set_action(ProfileAction.JPROFILE_STOP);
+        req.setAction(ProfileAction.JPROFILE_STOP);
         
         mc.runProfiling(req, true);
         
@@ -372,9 +372,9 @@ public class BasicContainerTest {
         final String workerTmpDir = ContainerTest.asAbsPath(workerRoot, "tmp");
         
         final StormTopology st = new StormTopology();
-        st.set_spouts(new HashMap<String, SpoutSpec>());
-        st.set_bolts(new HashMap<String, Bolt>());
-        st.set_state_spouts(new HashMap<String, StateSpoutSpec>());
+        st.setSpouts(new HashMap<String, SpoutSpec>());
+        st.setBolts(new HashMap<String, Bolt>());
+        st.setState_spouts(new HashMap<String, StateSpoutSpec>());
         byte [] serializedState = Utils.gzip(Utils.thriftSerialize(st));
         
         final Map<String, Object> superConf = new HashMap<>();
@@ -384,7 +384,7 @@ public class BasicContainerTest {
         superConf.put(Config.WORKER_CHILDOPTS, " -Dtesting=true");
         
         final LocalAssignment la = new LocalAssignment();
-        la.set_topology_id(topoId);
+        la.setTopology_id(topoId);
         
         final AdvancedFSOps ops = mock(AdvancedFSOps.class);
         when(ops.doRequiredTopoFilesExist(superConf, topoId)).thenReturn(true);
@@ -460,7 +460,7 @@ public class BasicContainerTest {
         int memOnheap = 512;
         
         LocalAssignment la = new LocalAssignment();
-        la.set_topology_id(topoId);
+        la.setTopology_id(topoId);
         
         Map<String, Object> superConf = new HashMap<>();
         

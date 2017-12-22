@@ -49,25 +49,25 @@ public class SlotTest {
     static WorkerResources mkWorkerResources(Double cpu, Double mem_on_heap, Double mem_off_heap) {
         WorkerResources resources = new WorkerResources();
         if (cpu != null) {
-            resources.set_cpu(cpu);
+            resources.setCpu(cpu);
         }
         
         if (mem_on_heap != null) {
-            resources.set_mem_on_heap(mem_on_heap);
+            resources.setMem_on_heap(mem_on_heap);
         }
         
         if (mem_off_heap != null) {
-            resources.set_mem_off_heap(mem_off_heap);
+            resources.setMem_off_heap(mem_off_heap);
         }
         return resources;
     }
     
     static LSWorkerHeartbeat mkWorkerHB(String id, int port, List<ExecutorInfo> exec, Integer timeSecs) {
         LSWorkerHeartbeat ret = new LSWorkerHeartbeat();
-        ret.set_topology_id(id);
-        ret.set_port(port);
-        ret.set_executors(exec);
-        ret.set_time_secs(timeSecs);
+        ret.setTopology_id(id);
+        ret.setPort(port);
+        ret.setExecutors(exec);
+        ret.setTime_secs(timeSecs);
         return ret;
     }
     
@@ -75,8 +75,8 @@ public class SlotTest {
         ArrayList<ExecutorInfo> ret = new ArrayList<>(executors.length);
         for (int exec : executors) {
             ExecutorInfo execInfo = new ExecutorInfo();
-            execInfo.set_task_start(exec);
-            execInfo.set_task_end(exec);
+            execInfo.setTask_start(exec);
+            execInfo.setTask_end(exec);
             ret.add(execInfo);
         }
         return ret;
@@ -84,10 +84,10 @@ public class SlotTest {
     
     static LocalAssignment mkLocalAssignment(String id, List<ExecutorInfo> exec, WorkerResources resources) {
         LocalAssignment ret = new LocalAssignment();
-        ret.set_topology_id(id);
-        ret.set_executors(exec);
+        ret.setTopology_id(id);
+        ret.setExecutors(exec);
         if (resources != null) {
-            ret.set_resources(resources);
+            ret.setResources(resources);
         }
         return ret;
     }
@@ -461,12 +461,12 @@ public class SlotTest {
                     containerLauncher, "localhost", port, iSuper, state);
             Set<TopoProfileAction> profileActions = new HashSet<>();
             ProfileRequest request = new ProfileRequest();
-            request.set_action(ProfileAction.JPROFILE_STOP);
+            request.setAction(ProfileAction.JPROFILE_STOP);
             NodeInfo info = new NodeInfo();
-            info.set_node("localhost");
-            info.add_to_port(port);
-            request.set_nodeInfo(info);
-            request.set_time_stamp(Time.currentTimeMillis() + 3000);//3 seconds from now
+            info.setNode("localhost");
+            info.addToPort(port);
+            request.setNodeInfo(info);
+            request.setTime_stamp(Time.currentTimeMillis() + 3000);//3 seconds from now
             
             TopoProfileAction profile = new TopoProfileAction(cTopoId, request);
             profileActions.add(profile);
